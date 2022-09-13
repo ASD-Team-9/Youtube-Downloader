@@ -4,7 +4,7 @@
              x:Class="YoutubeDownloader.MainPage">
     <ScrollView>
         <HorizontalStackLayout>
-            <VerticalStackLayout Spacing="10" Padding="30, 20">
+            <VerticalStackLayout Spacing="10" Padding="30, 30">
                 <Label
                     Text="Youtube Downloader"
                     SemanticProperties.HeadingLevel="Level1"
