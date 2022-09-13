@@ -2,27 +2,63 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YoutubeDownloader.MainPage">
-    <ScrollView>
-        <HorizontalStackLayout>
-            <VerticalStackLayout Spacing="10" Padding="30, 20">
-                <Label
-                    Text="Youtube Downloader"
-                    SemanticProperties.HeadingLevel="Level1"
-                    FontSize="32"/>
 
-                <Label
-                    Text="The best Youtube Downloader in UTS"
-                    SemanticProperties.HeadingLevel="Level2"
-                    SemanticProperties.Description="The best Youtube Downloader in UTS"
-                    FontSize="18"/>
+    <Grid>
+        <!-- These are the number of rows (8) and columns (3), no need to touch. -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
 
-                <Button
+        <!-- Left Bar -->
+        <VerticalStackLayout
+            BackgroundColor="#292b2f"
+            Grid.Column="0" Grid.Row="0"
+            Spacing="10" Padding="30, 20">
+
+            <!-- .MAUI is so new that there is no such thing as OnHover events. -->
+            <Entry Placeholder="Paste URL Here."/>
+
+            <!-- I'm struggling on getting the data to the ListView -->
+            <ListView ItemsSource="{Binding downloadingVideos}" x:Name="VideoDownloadListView">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding VideoName}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            
+        </VerticalStackLayout>
+
+        <!-- Icon Bar at bottom left -->
+        <HorizontalStackLayout
+            BackgroundColor="#292b2f"
+            Grid.Column="0" Grid.Row="1"
+            Spacing="10" Padding="30, 20">
+
+            <Button
                     x:Name="CounterBtn"
                     Text="Click me"
-                    SemanticProperties.Hint="Counts the number of times you click"
                     Clicked="OnCounterClicked"
                     HorizontalOptions="Start"/>
-            </VerticalStackLayout>
+
         </HorizontalStackLayout>
-    </ScrollView>
+
+        <!-- Right Page -->
+        <VerticalStackLayout
+            BackgroundColor="#2f3136"
+            Grid.Column="1" Grid.Row="0"
+            Grid.ColumnSpan="2" Grid.RowSpan="2"
+            Spacing="10" Padding="30, 20">
+            
+            <Label FontSize="32">Insert page over here</Label>
+            <Image Source="dotnet_bot.png" WidthRequest="200"/>
+            <Image Source="save_icon.gif" WidthRequest="200" IsAnimationPlaying="True"/>
+
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

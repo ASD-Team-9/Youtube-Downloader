@@ -1,25 +1,21 @@
-﻿namespace YoutubeDownloader;
+﻿using Microsoft.Maui.Platform;
+
+namespace YoutubeDownloader;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+	public List<Video> downloadingVideos = new();
 
 	public MainPage()
 	{
 		InitializeComponent();
+		VideoDownloadListView.SetBinding(Label.TextProperty, "Video");
+		VideoDownloadListView.BindingContext = downloadingVideos;
 	}
 
 	private void OnCounterClicked(object sender, EventArgs e)
 	{
-		count++;
-
-		if (count == 1)
-			CounterBtn.Text = $"Search {count} time";
-		else
-			CounterBtn.Text = $"Search {count} times";
-
-		SemanticScreenReader.Announce(CounterBtn.Text);
-	}
+		downloadingVideos.Add(new("YouTube Video Name here."));
+        CounterBtn.Text = "Huh";
+    }
 }
-
-
