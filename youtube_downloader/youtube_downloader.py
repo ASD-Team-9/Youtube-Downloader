@@ -15,5 +15,5 @@ if __name__ == "__main__":
 
     subprocess.run([ytdlp,
                    "https://www.youtube.com/watch?v=T9eTatBQ-ic"])
-    print("Finished")
+    print("Finished Downloading")
     input()
