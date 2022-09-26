@@ -36,6 +36,7 @@ class FrontEnd(customtkinter.CTk):
 
         leftFrame = customtkinter.CTkFrame(self, fg_color=colours["Dark"], corner_radius=0)
         leftFrame.pack(side=tkinter.LEFT, anchor="nw", fill=tkinter.Y, ipadx=padding, ipady=padding)
+        self.test = leftFrame
 
         def SetLeftTopFrame():
             leftTopFrame = customtkinter.CTkFrame(leftFrame, fg_color=colours["Normal2"], height=self.height * 0.1)
@@ -56,14 +57,14 @@ class FrontEnd(customtkinter.CTk):
         def SetLeftMiddleFrame():
             leftMiddleFrame = customtkinter.CTkFrame(leftFrame, fg_color=colours["Normal2"])
             leftMiddleFrame.pack(side="top", fill=tkinter.BOTH, expand=True, padx=padding)
-
-            self.canvas = tkinter.Canvas(leftMiddleFrame, highlightthickness=0)
+            self.canvas = tkinter.Canvas(leftMiddleFrame, highlightthickness=0, width=leftFrameWidth - padding * 5)
             scrollbar = customtkinter.CTkScrollbar(leftMiddleFrame, fg_color=colours["Normal2"], command=self.canvas.yview)
             scrollbar.pack(side="right", fill="y", padx=(0, 3))
 
             self.scrollable_frame = tkinter.Frame(self.canvas, bg=colours["Normal2"])
             self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
             self.scrollable_frame.pack(fill="both", expand=True)
+            
             self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
             self.canvas.configure(yscrollcommand=scrollbar.set, bg=colours["Normal2"])
             self.canvas.pack(side="left", fill="both", expand=True, padx=(padding, 0), pady=padding)
@@ -109,7 +110,7 @@ class FrontEnd(customtkinter.CTk):
         self.currentPage.pack(fill="both", expand=True)
 
     def GetBrowserPage(self, rightFrame) -> customtkinter.CTkFrame:
-        page = customtkinter.CTkFrame(rightFrame)
+        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
         title = customtkinter.CTkLabel(page, text="Browser Page", fg_color="#321321")
@@ -119,7 +120,7 @@ class FrontEnd(customtkinter.CTk):
         return page
 
     def GetSettingsPage(self, rightFrame) -> customtkinter.CTkFrame:
-        page = customtkinter.CTkFrame(rightFrame)
+        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
         title = customtkinter.CTkLabel(page, text="Settings Page", fg_color="#321321")
@@ -129,7 +130,7 @@ class FrontEnd(customtkinter.CTk):
         return page
 
     def GetHistoryPage(self, rightFrame) -> customtkinter.CTkFrame:
-        page = customtkinter.CTkFrame(rightFrame)
+        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
         title = customtkinter.CTkLabel(page, text="History Page", fg_color="#321321")
@@ -152,10 +153,10 @@ class FrontEnd(customtkinter.CTk):
 
             #When adding a new item to the queue. Move this later.
             padding = 10
-            width = self.canvas.winfo_width() - 30
+            width = self.canvas.winfo_width() - 27
             frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color=colours["Normal"])
             frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
-            customtkinter.CTkLabel(frame, text="Video Name here", bg_color="green", width=width).pack(anchor="n", pady=padding)
+            customtkinter.CTkLabel(frame, text="Video Name here", width=width).pack(anchor="n", pady=padding)
             customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
 
             self.downloader.download(value)
