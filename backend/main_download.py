@@ -1,11 +1,20 @@
-import asyncio
+import platform
+import subprocess
+import os
+import threading
 
-class Downloading:
-    def __init__(self) -> None:
-        pass
+class Downloader:
+    def __init__(self, frontend) -> None:
+        self.frontend = frontend
+        path = os.path.abspath(os.path.dirname(__file__))
+        program = "yt-dlp_macos" if platform.system() == "Darwin" else "yt-dlp.exe"
+        self.ytdlp = f"{path}/../resources/{program}"
 
-    async def add_to_queue(self) -> None:
-        pass
+        self.thread = None
 
-if __name__ == "__main__":
-    print("Ok")
+    def download(self, url) -> None:
+        self.thread = threading.Thread(target=self.thread_download, args=[url])
+        self.thread.start()
+
+    def thread_download(self, url) -> None:
+        subprocess.run([self.ytdlp, url])

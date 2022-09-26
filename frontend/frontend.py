@@ -1,5 +1,4 @@
-from ctypes import alignment
-import fractions
+import backend.main_download
 import customtkinter
 import tkinter
 
@@ -15,6 +14,8 @@ colours = {
 class FrontEnd(customtkinter.CTk):
     def __init__(self) -> None:
         super().__init__()
+        self.downloader = backend.main_download.Downloader(self)
+
         self.SetMainSettings()
         self.SetLeftFrame()
         self.SetRightFrame()
@@ -149,17 +150,15 @@ class FrontEnd(customtkinter.CTk):
         if value != "":
             self.entry.delete(0, tkinter.END)
 
+            #When adding a new item to the queue. Move this later.
+            padding = 10
+            width = self.canvas.winfo_width() - 30
+            frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color=colours["Normal"])
+            frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
+            customtkinter.CTkLabel(frame, text="Video Name here", bg_color="green", width=width).pack(anchor="n", pady=padding)
+            customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
 
-        #When adding a new item to the queue. Move this later.
-        padding = 10
-        width = self.canvas.winfo_width() - 30
-        frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color=colours["Normal"])
-        frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
-        customtkinter.CTkLabel(frame, text="Video Name here", bg_color="green", width=width).pack(anchor="n", pady=padding)
-        customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
+            self.downloader.download(value)
 
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)
-
-if __name__ == "__main__":
-    FrontEnd()
