@@ -84,7 +84,7 @@ class FrontEnd(customtkinter.CTk):
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
             ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Settings Page")) #Example...
             ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Browser Page"))
-            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("History Page"))
+            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Account Page"))
             ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: print("I don't know what page this should be."))
         SetLeftBottomFrame()
 
@@ -95,7 +95,7 @@ class FrontEnd(customtkinter.CTk):
         self.pages = {
             "Browser Page": self.GetBrowserPage(rightFrame),
             "Settings Page" : self.GetSettingsPage(rightFrame),
-            "History Page" : self.GetHistoryPage(rightFrame),
+            "Account Page" : self.GetAccountPage(rightFrame),
             #Add pages here...
             #"Page Name" : methodOfPage(rightFrame)
         }
@@ -129,11 +129,11 @@ class FrontEnd(customtkinter.CTk):
 
         return page
 
-    def GetHistoryPage(self, rightFrame) -> customtkinter.CTkFrame:
+    def GetAccountPage(self, rightFrame) -> customtkinter.CTkFrame:
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="History Page", fg_color="#321321")
+        title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
         title.pack(anchor="nw", padx=10, pady=10)
         ###
 
@@ -150,16 +150,15 @@ class FrontEnd(customtkinter.CTk):
         value = self.entry.get()
         if value != "":
             self.entry.delete(0, tkinter.END)
-
-            #When adding a new item to the queue. Move this later.
-            padding = 10
-            width = self.canvas.winfo_width() - 27
-            frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color=colours["Normal"])
-            frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
-            customtkinter.CTkLabel(frame, text="Video Name here", width=width).pack(anchor="n", pady=padding)
-            customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
-
             self.downloader.download(value)
+
+        #When adding a new item to the queue. Move this later.
+        padding = 10
+        width = self.canvas.winfo_width() - 27
+        frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color=colours["Normal"])
+        frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
+        customtkinter.CTkLabel(frame, text="Video Name here", width=width).pack(anchor="n", pady=padding)
+        customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
 
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)
