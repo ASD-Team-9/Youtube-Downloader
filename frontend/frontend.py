@@ -1,5 +1,5 @@
 from queue import Empty
-from turtle import right
+from turtle import bgcolor, right
 import backend.main_download
 import customtkinter
 import tkinter
@@ -158,9 +158,30 @@ class FrontEnd(customtkinter.CTk):
         
         print("Download Opitons Page run")
         ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Fetch Youtube Video title", fg_color=colours["Text"])
+        title = customtkinter.CTkLabel(page, text="[In Progress] Fetch Youtube Video title", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
         ###
+
+        videoQualityTitle = customtkinter.CTkLabel(page, text="Options", fg_color=colours["Text"])
+        videoQualityTitle.pack(anchor="nw", padx=5, pady=5)
+
+        # DOWNLOAD TYPE OPTIONS
+        self.downloadOptions = ['mp4', 'mp3']
+        self.downloadOption_var = tkinter.StringVar(self)
+        def downloadOptionChanged(*args):
+            print("Download Option Change" + self.downloadOption_var.get())
+        downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.downloadOption_var, values=self.downloadOptions, command=downloadOptionChanged)
+        downloadOptionsBar.set('mp4')
+        downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
+
+        # D
+        self.videoQualityOptions = ['1080p', '720p', '480p', '360p']
+        self.videoQualityOption_var = tkinter.StringVar(self)
+        def videoQualityChanged(*args):
+            print("Quality change" + self.videoQualityOption_var.get())
+        videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.videoQualityOption_var, values=self.videoQualityOptions, command=videoQualityChanged)
+        videoQualityOptionsBar.set('1080p')
+        videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
 
         return page
 
