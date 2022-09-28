@@ -1,9 +1,16 @@
-from queue import Empty
-from turtle import bgcolor, right
 import backend.main_download
+
+# UI
 import customtkinter
 import tkinter
+from PIL import Image, ImageTk
+
+# Services
 from youtubesearchpython import *
+from urllib.request import urlopen
+from io import BytesIO
+import base64
+
 
 colours = {
     "Normal": "#33363B",
@@ -19,6 +26,9 @@ class FrontEnd(customtkinter.CTk):
     def __init__(self) -> None:
         super().__init__()
         self.downloader = backend.main_download.Downloader(self)
+
+        self.searchedVideoTitle = tkinter.StringVar()
+        self.searchedVideoImageURL = tkinter.StringVar()
 
         self.SetMainSettings()
         self.SetLeftFrame()
@@ -157,13 +167,25 @@ class FrontEnd(customtkinter.CTk):
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
         
         print("Download Opitons Page run")
-        ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="[In Progress] Fetch Youtube Video title", fg_color=colours["Text"])
+        ###
+        title = customtkinter.CTkLabel(page, textvariable=self.searchedVideoTitle)
+        title.configure(font=("Helvetica", 18))
         title.pack(anchor="nw", padx=10, pady=10)
+
+        imageTitle = tkinter.Label(page, image=self.searchedVideoImageURL.get())
+
+        def updateImage(*args):
+            print("Updating image: " + self.searchedVideoImageURL.get())
+            fetchImage = GetImageFromURL(self.searchedVideoImageURL.get())
+            imageTitle.configure(image=fetchImage)
+            imageTitle.image = fetchImage
+            imageTitle.pack(anchor="nw", padx=10, pady=10)
+
+        self.searchedVideoImageURL.trace('w', updateImage)
         ###
 
-        videoQualityTitle = customtkinter.CTkLabel(page, text="Options", fg_color=colours["Text"])
-        videoQualityTitle.pack(anchor="nw", padx=5, pady=5)
+        optionTitle = customtkinter.CTkLabel(page, text="Options")
+        optionTitle.pack(anchor="nw", padx=5, pady=5)
 
         # DOWNLOAD TYPE OPTIONS
         self.downloadOptions = ['mp4', 'mp3']
@@ -203,14 +225,17 @@ class FrontEnd(customtkinter.CTk):
         if text != "":
             print("Have text")
             self.ChangePage("Download Options Page")
-            self.searchedVideo = self.getVideo(text)
-            # print(fetchedVideo)
-            # if fetchedVideo != None:
-            #     self.video = fetchedVideo
+            self.searchedVideo = self.getVideo(self.entry.get())
+            
+            # print(self.searchedVideo)
             if (self.searchedVideo != None):
                 print(self.searchedVideo["title"])
+                self.searchedVideoTitle.set(self.searchedVideo["title"])
+                self.searchedVideoImageURL.set(self.searchedVideo["thumbnails"][0]["url"])
             else:
                 print("No video found")
+                self.searchedVideoTitle.set('No found')
+                self.searchedVideoImageURL.set('')
         
 
 
@@ -237,3 +262,13 @@ class FrontEnd(customtkinter.CTk):
 
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)
+
+
+def GetImageFromURL(url):
+    if url == "": return
+    u = urlopen(url)
+    raw_data = u.read()
+    u.close()
+
+    im = Image.open(BytesIO(raw_data))
+    return ImageTk.PhotoImage(im)
