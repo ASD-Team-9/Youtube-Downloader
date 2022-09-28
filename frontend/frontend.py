@@ -1,7 +1,9 @@
+from queue import Empty
 from turtle import right
 import backend.main_download
 import customtkinter
 import tkinter
+from youtubesearchpython import *
 
 colours = {
     "Normal": "#33363B",
@@ -113,6 +115,11 @@ class FrontEnd(customtkinter.CTk):
 
     def ChangePage(self, page) -> None:
         self.currentPage.forget()
+    
+        # if page == "Download Options Page":
+        #     self.currentPage.grid_forget()
+        #     self.currentPage.pack_forget()
+
         self.currentPage = self.pages[page]
         self.currentPage.pack(fill="both", expand=True)
 
@@ -148,7 +155,8 @@ class FrontEnd(customtkinter.CTk):
 
     def GetDownloadOptionsPage(self, rightFrame) -> customtkinter.CTkFrame:
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
-
+        
+        print("Download Opitons Page run")
         ###Fill stuff in over here!
         title = customtkinter.CTkLabel(page, text="Fetch Youtube Video title", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
@@ -174,6 +182,14 @@ class FrontEnd(customtkinter.CTk):
         if text != "":
             print("Have text")
             self.ChangePage("Download Options Page")
+            self.searchedVideo = self.getVideo(text)
+            # print(fetchedVideo)
+            # if fetchedVideo != None:
+            #     self.video = fetchedVideo
+            if (self.searchedVideo != None):
+                print(self.searchedVideo["title"])
+            else:
+                print("No video found")
         
 
 
@@ -190,6 +206,13 @@ class FrontEnd(customtkinter.CTk):
         frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
         customtkinter.CTkLabel(frame, text="Video Name here", width=width).pack(anchor="n", pady=padding)
         customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
+
+    def getVideo(self, url):
+        try:
+            video = Video.get(url, mode=ResultMode.json)
+            return video
+        except:
+            return
 
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)
