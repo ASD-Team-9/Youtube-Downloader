@@ -1,3 +1,4 @@
+from turtle import right
 import backend.main_download
 import customtkinter
 import tkinter
@@ -12,6 +13,7 @@ colours = {
 }
 
 class FrontEnd(customtkinter.CTk):
+
     def __init__(self) -> None:
         super().__init__()
         self.downloader = backend.main_download.Downloader(self)
@@ -43,9 +45,13 @@ class FrontEnd(customtkinter.CTk):
             leftTopFrame.pack(side=tkinter.TOP, anchor="nw", fill=tkinter.X, padx=padding, pady=padding, ipady=padding)
             
             logo = GetImage("Download.png").subsample(2)
+
             self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 61, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.GetClipboard)
+            self.entry.bind("<Key>", self.HandleSearchChanged)
+
+
             customtkinter.CTkButton(
                 leftTopFrame, image=logo,
                 width=logo.width() + padding, height=logo.height() + padding,
@@ -96,6 +102,7 @@ class FrontEnd(customtkinter.CTk):
             "Browser Page": self.GetBrowserPage(rightFrame),
             "Settings Page" : self.GetSettingsPage(rightFrame),
             "Account Page" : self.GetAccountPage(rightFrame),
+            "Download Options Page": self.GetDownloadOptionsPage(rightFrame),
             #Add pages here...
             #"Page Name" : methodOfPage(rightFrame)
         }
@@ -113,7 +120,7 @@ class FrontEnd(customtkinter.CTk):
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Browser Page", fg_color="#321321")
+        title = customtkinter.CTkLabel(page, text="Browser Page", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
         ###
 
@@ -123,7 +130,7 @@ class FrontEnd(customtkinter.CTk):
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Settings Page", fg_color="#321321")
+        title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
         ###
 
@@ -139,12 +146,36 @@ class FrontEnd(customtkinter.CTk):
 
         return page
 
+    def GetDownloadOptionsPage(self, rightFrame) -> customtkinter.CTkFrame:
+        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
+
+        ###Fill stuff in over here!
+        title = customtkinter.CTkLabel(page, text="Fetch Youtube Video title", fg_color=colours["Text"])
+        title.pack(anchor="nw", padx=10, pady=10)
+        ###
+
+        return page
+
     def GetClipboard(self, event): #This is used as a delegate, the event parameter is needed.
         try:
             self.entry.delete(0, tkinter.END)
             self.entry.insert(0, self.clipboard_get())
         except:
             pass
+
+    def HandleSearchChanged(self, event):
+        text = self.entry.get() + event.char
+        print("Handle Search Change: " + text)
+        if len(self.entry.get()) == 0:
+            print("Empty text")
+            self.ChangePage("Browser Page")
+            return
+
+        if text != "":
+            print("Have text")
+            self.ChangePage("Download Options Page")
+        
+
 
     def Download(self):
         value = self.entry.get()
