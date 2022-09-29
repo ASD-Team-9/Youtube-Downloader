@@ -58,17 +58,22 @@ class FrontEnd(customtkinter.CTk):
             
             logo = GetImage("Download.png").subsample(2)
 
-            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 61, height=40, placeholder_text="Search")
+            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 106, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.GetClipboard)
-            self.entry.bind("<Key>", self.HandleSearchChanged)
-
 
             customtkinter.CTkButton(
                 leftTopFrame, image=logo,
                 width=logo.width() + padding, height=logo.height() + padding,
                 fg_color=colours["ButtonNormal"], hover_color=colours["ButtonHover"],
                 text="", command=self.Download
+            ).pack(side="left", fill=tkinter.X, expand=True, padx=(padding, 0))
+
+            customtkinter.CTkButton(
+                leftTopFrame, image=GetImage("Logo.png"),
+                width=logo.width() + padding, height=logo.height() + padding,
+                fg_color=colours["ButtonNormal"], hover_color=colours["ButtonHover"],
+                text="", command=self.HandleSearchChanged
             ).pack(side="left", fill=tkinter.X, expand=True, padx=padding)
         SetLeftTopFrame()
 
@@ -214,8 +219,8 @@ class FrontEnd(customtkinter.CTk):
         except:
             pass
 
-    def HandleSearchChanged(self, event):
-        text = self.entry.get() + event.char
+    def HandleSearchChanged(self):
+        text = self.entry.get()
         print("Handle Search Change: " + text)
         if len(self.entry.get()) == 0:
             print("Empty text")
@@ -236,8 +241,6 @@ class FrontEnd(customtkinter.CTk):
                 print("No video found")
                 self.searchedVideoTitle.set('No found')
                 self.searchedVideoImageURL.set('')
-        
-
 
     def Download(self):
         value = self.entry.get()
