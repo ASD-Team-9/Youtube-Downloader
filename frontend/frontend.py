@@ -1,3 +1,4 @@
+import random
 import backend.global_variables as vars
 import backend.main_download
 import frontend.pages as Pages
@@ -5,12 +6,9 @@ import frontend.pages as Pages
 # UI
 import customtkinter
 import tkinter
-from PIL import Image, ImageTk
 
 # Services
 import youtubesearchpython as YouTube
-from urllib.request import urlopen
-from io import BytesIO
 import threading
 
 class FrontEnd(customtkinter.CTk):
@@ -37,27 +35,28 @@ class FrontEnd(customtkinter.CTk):
 
         leftFrame = customtkinter.CTkFrame(self, fg_color=vars.colours["Dark"], corner_radius=0)
         leftFrame.pack(side=tkinter.LEFT, anchor="nw", fill=tkinter.Y, ipadx=padding, ipady=padding)
+        self.test = leftFrame
 
         def SetLeftTopFrame():
             leftTopFrame = customtkinter.CTkFrame(leftFrame, fg_color=vars.colours["Normal2"], height=self.height * 0.1)
             leftTopFrame.pack(side=tkinter.TOP, anchor="nw", fill=tkinter.X, padx=padding, pady=padding, ipady=padding)
             
-            logo = GetImage("Download.png").subsample(2)
-
-            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 106, height=40, placeholder_text="Search")
+            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - 134, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.AutoSearch)
 
+            clearIcon = GetImage("ClearIcon.png").subsample(4)
+            searchIcon = GetImage("SearchIcon.png").subsample(3)
+            width = ((clearIcon.width() + searchIcon.width()) * 0.5) + padding
+            height = ((clearIcon.height() + searchIcon.height()) * 0.5) + padding
             customtkinter.CTkButton(
-                leftTopFrame, image=logo,
-                width=logo.width() + padding, height=logo.height() + padding,
+                leftTopFrame, image=clearIcon, width=width, height=height,
                 fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"],
                 text="", command=self.ClearEntry
             ).pack(side="left", fill=tkinter.X, expand=True, padx=(padding, 0))
 
             customtkinter.CTkButton(
-                leftTopFrame, image=GetImage("Logo.png"),
-                width=logo.width() + padding, height=logo.height() + padding,
+                leftTopFrame, image=searchIcon, width=width, height=height,
                 fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"],
                 text="", command=self.SearchEntry
             ).pack(side="left", fill=tkinter.X, expand=True, padx=padding)
@@ -66,16 +65,19 @@ class FrontEnd(customtkinter.CTk):
         def SetLeftMiddleFrame():
             leftMiddleFrame = customtkinter.CTkFrame(leftFrame, fg_color=vars.colours["Normal2"])
             leftMiddleFrame.pack(side="top", fill=tkinter.BOTH, expand=True, padx=padding)
+
             self.canvas = tkinter.Canvas(leftMiddleFrame, highlightthickness=0, width=leftFrameWidth - padding * 5)
+
             scrollbar = customtkinter.CTkScrollbar(leftMiddleFrame, fg_color=vars.colours["Normal2"], command=self.canvas.yview)
             scrollbar.pack(side="right", fill="y", padx=(0, 3))
 
             self.scrollable_frame = tkinter.Frame(self.canvas, bg=vars.colours["Normal2"])
             self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
             self.scrollable_frame.pack(fill="both", expand=True)
-            
+
             self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
             self.canvas.configure(yscrollcommand=scrollbar.set, bg=vars.colours["Normal2"])
+            self.canvas.bind_all("<MouseWheel>", lambda event: self.canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
             self.canvas.pack(side="left", fill="both", expand=True, padx=(padding, 0), pady=padding)
         SetLeftMiddleFrame()
 
@@ -100,8 +102,9 @@ class FrontEnd(customtkinter.CTk):
         customtkinter.CTkFrame(self.rightFrame, height=0, width = self.width * 2 / 3, corner_radius=0).pack(anchor="nw") #fill
 
         self.pages = {
-            "Settings Page" : Pages.GetSettingsPage(self.rightFrame),
-            "Account Page" : Pages.GetAccountPage(self.rightFrame),
+            "Settings Page" : Pages.GetSettingsPage(self),
+            "Account Page" : Pages.GetAccountPage(self),
+            "Unknown Page" : customtkinter.CTkFrame(self.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
             #Add pages here...
             #"Page Name" : methodOfPage(rightFrame)
         }
@@ -123,54 +126,56 @@ class FrontEnd(customtkinter.CTk):
                 self.entry.insert(0, clipboard)
                 self.SearchEntry()
 
-    def ClearEntry(self):
+    def ClearEntry(self, autoRefocus = True):
         self.entry.delete(0, tkinter.END)
         self.focus()
-        self.entry.focus()
+        vars.thumbnails.clear()
+        self.ChangePage("Unknown Page")
+        if (autoRefocus):
+            self.entry.focus()
+        
+        for i in range(10):
+            YouTubeItem(self, "Insert Video name here")
+        print(self.test._current_width)
+        print(self.width / 3)
 
     def SearchEntry(self):
-        vars.threads["searching thread"] = threading.Thread(target=self.thread_search, args=[self.entry.get()])
-        vars.threads["searching thread"].start()
+        search = self.entry.get()
+        if search != "":
+            vars.threads["searching thread"] = threading.Thread(target=self.thread_search, args=[search])
+            vars.threads["searching thread"].start()
 
     def thread_search(self, userInput):
         nextPage = None
         try:
             if vars.regex.fullmatch(userInput):
                 nextPage = "Video Details Page"
-                self.pages[nextPage] = Pages.GetVideoDetailsPage(self.rightFrame, searchURL(userInput))
+                self.pages[nextPage] = Pages.GetVideoDetailsPage(self, False, searchURL(userInput))
             else:
                 raise
         except:
             nextPage = "Browser Page"
-            self.pages[nextPage] = Pages.GetBrowserPage(self.rightFrame, searchInput(userInput))
+            self.pages[nextPage] = Pages.GetBrowserPage(self, searchInput(userInput))
         self.ChangePage(nextPage)
         vars.threads["searching thread"] = None
 
-    def Download(self):
-        value = self.entry.get()
-        if value != "":
-            self.entry.delete(0, tkinter.END)
-            self.downloader.download(value)
+    def Download(self, url):
+        self.ClearEntry(False)
+        self.downloader.download(url)
 
+class YouTubeItem:
+    def __init__(self, frontend, video_name) -> None:
         #When adding a new item to the queue. Move this later.
         padding = 10
-        width = self.canvas.winfo_width() - 27
-        frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
+        width = frontend.canvas.winfo_width() - 27
+        frame = customtkinter.CTkFrame(frontend.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
         frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
-        customtkinter.CTkLabel(frame, text="Video Name here", width=width).pack(anchor="n", pady=padding)
-        customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
+        customtkinter.CTkLabel(frame, text=video_name, width=width).pack(anchor="n", pady=padding)
+        self.progress_bar = customtkinter.CTkProgressBar(frame, width=width)
+        self.progress_bar.pack(side="top")
 
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)
-
-def GetImageFromURL(url) -> tkinter.PhotoImage:
-    try:
-        u = urlopen(url)
-        raw_data = u.read()
-        u.close()
-        return ImageTk.PhotoImage(Image.open(BytesIO(raw_data)))
-    except:
-        return
 
 def searchURL(url):
     try:

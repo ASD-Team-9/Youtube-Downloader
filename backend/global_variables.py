@@ -1,5 +1,9 @@
 import re
 
+isUpdating = False
+
+thumbnails = []
+
 threads = {
     "auto update thread": None,
     "downloading thread": None,

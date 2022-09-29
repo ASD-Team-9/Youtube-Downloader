@@ -1,8 +1,13 @@
+from email.mime import image
 import backend.global_variables as vars
 import customtkinter
 
-def GetSettingsPage(rightFrame) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
+from PIL import Image, ImageTk
+from urllib.request import urlopen
+from io import BytesIO
+
+def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=vars.colours["Text"])
@@ -10,8 +15,8 @@ def GetSettingsPage(rightFrame) -> customtkinter.CTkFrame:
     ###
     return page
 
-def GetAccountPage(rightFrame) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
+def GetAccountPage(frontend) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
@@ -19,8 +24,8 @@ def GetAccountPage(rightFrame) -> customtkinter.CTkFrame:
     ###
     return page
 
-def GetBrowserPage(rightFrame, searchResults) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
+def GetBrowserPage(frontend, searchResults) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     for video in searchResults:
         for key in ["title", "duration", "thumbnails", "link"]:
@@ -28,11 +33,20 @@ def GetBrowserPage(rightFrame, searchResults) -> customtkinter.CTkFrame:
             title.pack(anchor="nw", padx=10, pady=10)
     return page
 
-def GetVideoDetailsPage(rightFrame, videoDetails) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
+def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
     
-    title = customtkinter.CTkLabel(page, text=videoDetails["title"], fg_color="#321321")
-    title.pack(anchor="nw", padx=10, pady=10)
+    customtkinter.CTkLabel(page, text=videoDetails["title"], fg_color="#321321").pack(anchor="nw", padx=10, pady=10)
+
+    Thumbnail(videoDetails["thumbnails"][-1]["url"])
+    thumbnail = customtkinter.CTkLabel(page, image=vars.thumbnails[0].thumbnail)
+    thumbnail.pack(anchor="nw", side="left")
+
+    customtkinter.CTkButton(
+        page, text="Download",
+        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"],
+        command=lambda: frontend.Download(videoDetails["link"])
+    ).pack(side="left")
     ###
 
     # # DOWNLOAD TYPE OPTIONS
@@ -54,3 +68,14 @@ def GetVideoDetailsPage(rightFrame, videoDetails) -> customtkinter.CTkFrame:
     # videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
 
     return page
+
+class Thumbnail:
+    def __init__(self, url) -> None:
+        try:
+            u = urlopen(url)
+            raw_data = u.read()
+            u.close()
+            self.thumbnail = ImageTk.PhotoImage(Image.open(BytesIO(raw_data)))
+        except:
+            return
+        vars.thumbnails.append(self)
