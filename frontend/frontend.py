@@ -1,4 +1,3 @@
-import random
 import backend.global_variables as vars
 import backend.main_download
 import frontend.pages as Pages
@@ -44,6 +43,7 @@ class FrontEnd(customtkinter.CTk):
             self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - 134, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.AutoSearch)
+            self.entry.bind("<Return>", self.SearchEntry)
 
             clearIcon = GetImage("ClearIcon.png").subsample(4)
             searchIcon = GetImage("SearchIcon.png").subsample(3)
@@ -85,16 +85,16 @@ class FrontEnd(customtkinter.CTk):
             leftBottomFrame = customtkinter.CTkFrame(leftFrame, fg_color=vars.colours["Normal2"], height=self.height * 0.1)
             leftBottomFrame.pack(anchor="n", fill=tkinter.X, padx=10, pady=10)
 
-            def ImageButtons(master, imageName: str, subsample: int, command) -> None:
+            def ImageButtons(imageName: str, subsample: int, command) -> None:
                 logo = GetImage(imageName).subsample(subsample)
                 customtkinter.CTkButton(
-                    master, image=logo,
+                    leftBottomFrame, image=logo,
                     width=logo.width() + 10, height=logo.height() + 10,
                     fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"],
                     text="", command=command
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
-            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Settings Page")) #Example...
-            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Account Page"))
+            ImageButtons("SettingsIcon.png", 3, lambda: self.ChangePage("Settings Page")) #Example...
+            ImageButtons("Logo.png", 1, lambda: self.ChangePage("Account Page"))
         SetLeftBottomFrame()
 
     def SetRightFrame(self) -> None:
@@ -133,13 +133,8 @@ class FrontEnd(customtkinter.CTk):
         self.ChangePage("Unknown Page")
         if (autoRefocus):
             self.entry.focus()
-        
-        for i in range(10):
-            YouTubeItem(self, "Insert Video name here")
-        print(self.test._current_width)
-        print(self.width / 3)
 
-    def SearchEntry(self):
+    def SearchEntry(self, event = None):
         search = self.entry.get()
         if search != "":
             vars.threads["searching thread"] = threading.Thread(target=self.thread_search, args=[search])
@@ -159,20 +154,9 @@ class FrontEnd(customtkinter.CTk):
         self.ChangePage(nextPage)
         vars.threads["searching thread"] = None
 
-    def Download(self, url):
+    def Download(self, video_name, args):
         self.ClearEntry(False)
-        self.downloader.download(url)
-
-class YouTubeItem:
-    def __init__(self, frontend, video_name) -> None:
-        #When adding a new item to the queue. Move this later.
-        padding = 10
-        width = frontend.canvas.winfo_width() - 27
-        frame = customtkinter.CTkFrame(frontend.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
-        frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
-        customtkinter.CTkLabel(frame, text=video_name, width=width).pack(anchor="n", pady=padding)
-        self.progress_bar = customtkinter.CTkProgressBar(frame, width=width)
-        self.progress_bar.pack(side="top")
+        self.downloader.download(video_name, args)
 
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)

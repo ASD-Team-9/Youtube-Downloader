@@ -1,10 +1,11 @@
-from email.mime import image
 import backend.global_variables as vars
 import customtkinter
 
 from PIL import Image, ImageTk
 from urllib.request import urlopen
 from io import BytesIO
+
+import frontend.frontend as Frontend
 
 def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
@@ -40,13 +41,17 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
 
     Thumbnail(videoDetails["thumbnails"][-1]["url"])
     thumbnail = customtkinter.CTkLabel(page, image=vars.thumbnails[0].thumbnail)
-    thumbnail.pack(anchor="nw", side="left")
+    thumbnail.pack(anchor="nw", side="top")
 
+    defaultargs = ["-o", "%(title)s.%(ext)s", "--progress-template", "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"]
+
+    image = Frontend.GetImage("Download.png")
     customtkinter.CTkButton(
-        page, text="Download",
-        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"],
-        command=lambda: frontend.Download(videoDetails["link"])
-    ).pack(side="left")
+        page, text="Download", image=image, compound="top",
+        width=image.width() + 10, height=image.height() + 10,
+        fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
+        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
+    ).pack(side="top", anchor="w")
     ###
 
     # # DOWNLOAD TYPE OPTIONS
