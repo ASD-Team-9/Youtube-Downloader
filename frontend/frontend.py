@@ -1,6 +1,16 @@
 import backend.main_download
+
+# UI
 import customtkinter
 import tkinter
+from PIL import Image, ImageTk
+
+# Services
+from youtubesearchpython import *
+from urllib.request import urlopen
+from io import BytesIO
+import base64
+
 
 colours = {
     "Normal": "#33363B",
@@ -12,9 +22,13 @@ colours = {
 }
 
 class FrontEnd(customtkinter.CTk):
+
     def __init__(self) -> None:
         super().__init__()
         self.downloader = backend.main_download.Downloader(self)
+
+        self.searchedVideoTitle = tkinter.StringVar()
+        self.searchedVideoImageURL = tkinter.StringVar()
 
         self.SetMainSettings()
         self.SetLeftFrame()
@@ -43,14 +57,23 @@ class FrontEnd(customtkinter.CTk):
             leftTopFrame.pack(side=tkinter.TOP, anchor="nw", fill=tkinter.X, padx=padding, pady=padding, ipady=padding)
             
             logo = GetImage("Download.png").subsample(2)
-            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 61, height=40, placeholder_text="Search")
+
+            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 106, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.GetClipboard)
+
             customtkinter.CTkButton(
                 leftTopFrame, image=logo,
                 width=logo.width() + padding, height=logo.height() + padding,
                 fg_color=colours["ButtonNormal"], hover_color=colours["ButtonHover"],
                 text="", command=self.Download
+            ).pack(side="left", fill=tkinter.X, expand=True, padx=(padding, 0))
+
+            customtkinter.CTkButton(
+                leftTopFrame, image=GetImage("Logo.png"),
+                width=logo.width() + padding, height=logo.height() + padding,
+                fg_color=colours["ButtonNormal"], hover_color=colours["ButtonHover"],
+                text="", command=self.HandleSearchChanged
             ).pack(side="left", fill=tkinter.X, expand=True, padx=padding)
         SetLeftTopFrame()
 
@@ -96,6 +119,7 @@ class FrontEnd(customtkinter.CTk):
             "Browser Page": self.GetBrowserPage(rightFrame),
             "Settings Page" : self.GetSettingsPage(rightFrame),
             "Account Page" : self.GetAccountPage(rightFrame),
+            "Download Options Page": self.GetDownloadOptionsPage(rightFrame),
             #Add pages here...
             #"Page Name" : methodOfPage(rightFrame)
         }
@@ -106,6 +130,11 @@ class FrontEnd(customtkinter.CTk):
 
     def ChangePage(self, page) -> None:
         self.currentPage.forget()
+    
+        # if page == "Download Options Page":
+        #     self.currentPage.grid_forget()
+        #     self.currentPage.pack_forget()
+
         self.currentPage = self.pages[page]
         self.currentPage.pack(fill="both", expand=True)
 
@@ -113,7 +142,7 @@ class FrontEnd(customtkinter.CTk):
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Browser Page", fg_color="#321321")
+        title = customtkinter.CTkLabel(page, text="Browser Page", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
         ###
 
@@ -123,7 +152,7 @@ class FrontEnd(customtkinter.CTk):
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
 
         ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Settings Page", fg_color="#321321")
+        title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
         ###
 
@@ -139,12 +168,79 @@ class FrontEnd(customtkinter.CTk):
 
         return page
 
+    def GetDownloadOptionsPage(self, rightFrame) -> customtkinter.CTkFrame:
+        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
+        
+        print("Download Opitons Page run")
+        ###
+        title = customtkinter.CTkLabel(page, textvariable=self.searchedVideoTitle)
+        title.configure(font=("Helvetica", 18))
+        title.pack(anchor="nw", padx=10, pady=10)
+
+        imageTitle = tkinter.Label(page, image=self.searchedVideoImageURL.get())
+
+        def updateImage(*args):
+            print("Updating image: " + self.searchedVideoImageURL.get())
+            fetchImage = GetImageFromURL(self.searchedVideoImageURL.get())
+            imageTitle.configure(image=fetchImage)
+            imageTitle.image = fetchImage
+            imageTitle.pack(anchor="nw", padx=10, pady=10)
+
+        self.searchedVideoImageURL.trace('w', updateImage)
+        ###
+
+        optionTitle = customtkinter.CTkLabel(page, text="Options")
+        optionTitle.pack(anchor="nw", padx=5, pady=5)
+
+        # DOWNLOAD TYPE OPTIONS
+        self.downloadOptions = ['mp4', 'mp3']
+        self.downloadOption_var = tkinter.StringVar(self)
+        def downloadOptionChanged(*args):
+            print("Download Option Change" + self.downloadOption_var.get())
+        downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.downloadOption_var, values=self.downloadOptions, command=downloadOptionChanged)
+        downloadOptionsBar.set('mp4')
+        downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
+
+        # D
+        self.videoQualityOptions = ['1080p', '720p', '480p', '360p']
+        self.videoQualityOption_var = tkinter.StringVar(self)
+        def videoQualityChanged(*args):
+            print("Quality change" + self.videoQualityOption_var.get())
+        videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.videoQualityOption_var, values=self.videoQualityOptions, command=videoQualityChanged)
+        videoQualityOptionsBar.set('1080p')
+        videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+
+        return page
+
     def GetClipboard(self, event): #This is used as a delegate, the event parameter is needed.
         try:
             self.entry.delete(0, tkinter.END)
             self.entry.insert(0, self.clipboard_get())
         except:
             pass
+
+    def HandleSearchChanged(self):
+        text = self.entry.get()
+        print("Handle Search Change: " + text)
+        if len(self.entry.get()) == 0:
+            print("Empty text")
+            self.ChangePage("Browser Page")
+            return
+
+        if text != "":
+            print("Have text")
+            self.ChangePage("Download Options Page")
+            self.searchedVideo = self.getVideo(self.entry.get())
+            
+            # print(self.searchedVideo)
+            if (self.searchedVideo != None):
+                print(self.searchedVideo["title"])
+                self.searchedVideoTitle.set(self.searchedVideo["title"])
+                self.searchedVideoImageURL.set(self.searchedVideo["thumbnails"][0]["url"])
+            else:
+                print("No video found")
+                self.searchedVideoTitle.set('No found')
+                self.searchedVideoImageURL.set('')
 
     def Download(self):
         value = self.entry.get()
@@ -160,5 +256,22 @@ class FrontEnd(customtkinter.CTk):
         customtkinter.CTkLabel(frame, text="Video Name here", width=width).pack(anchor="n", pady=padding)
         customtkinter.CTkProgressBar(frame, width=width).pack(side="top")
 
+    def getVideo(self, url):
+        try:
+            video = Video.get(url, mode=ResultMode.json)
+            return video
+        except:
+            return
+
 def GetImage(imageName) -> tkinter.PhotoImage:
     return tkinter.PhotoImage(file="frontend/images/" + imageName)
+
+
+def GetImageFromURL(url):
+    if url == "": return
+    u = urlopen(url)
+    raw_data = u.read()
+    u.close()
+
+    im = Image.open(BytesIO(raw_data))
+    return ImageTk.PhotoImage(im)
