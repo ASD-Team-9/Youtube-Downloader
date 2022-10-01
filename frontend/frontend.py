@@ -105,9 +105,9 @@ class FrontEnd(customtkinter.CTk):
                     fg_color=colours["ButtonNormal"], hover_color=colours["ButtonHover"],
                     text="", command=command
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
-            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Settings Page")) #Example...
-            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Browser Page"))
-            ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: self.ChangePage("Account Page"))
+            ImageButtons(leftBottomFrame, "Settings.png", 1, lambda: self.ChangePage("Settings Page")) #Example...
+            ImageButtons(leftBottomFrame, "Youtube-Logo.png", 1, lambda: self.ChangePage("Browser Page"))
+            ImageButtons(leftBottomFrame, "Account.png", 1, lambda: self.ChangePage("Account Page"))
             ImageButtons(leftBottomFrame, "Logo.png", 1, lambda: print("I don't know what page this should be."))
         SetLeftBottomFrame()
 
@@ -278,3 +278,5 @@ def GetImageFromURL(url):
 
     im = Image.open(BytesIO(raw_data))
     return ImageTk.PhotoImage(im)
+
+
