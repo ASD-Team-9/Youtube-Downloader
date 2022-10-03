@@ -45,14 +45,6 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
 
     defaultargs = ["-o", "%(title)s.%(ext)s", "--progress-template", "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"]
 
-    image = Frontend.GetImage("Download.png")
-    customtkinter.CTkButton(
-        page, text="Download", image=image, compound="top",
-        width=image.width() + 10, height=image.height() + 10,
-        fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
-        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
-    ).pack(side="top", anchor="w")
-
     ## DOWNLOAD TYPE OPTIONS
     downloadOptions = ['mp4', 'mp3']
     downloadOption_var = customtkinter.StringVar()
@@ -69,6 +61,14 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
     videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=videoQualityOption_var, values=videoQualityOptions, command=videoQualityChanged)
     videoQualityOptionsBar.set('1080p')
     videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+
+    image = Frontend.GetImage("Download.png")
+    customtkinter.CTkButton(
+        page, text="Download", image=image, compound="top",
+        width=image.width() + 10, height=image.height() + 10,
+        fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
+        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
+    ).pack(side="top", anchor="w")
 
     return page
 
