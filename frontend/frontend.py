@@ -5,6 +5,7 @@ import frontend.pages as Pages
 # UI
 import customtkinter
 import tkinter
+from tkinter import messagebox
 
 # Services
 import youtubesearchpython as YouTube
@@ -14,6 +15,7 @@ class FrontEnd(customtkinter.CTk):
     def __init__(self) -> None:
         super().__init__()
         self.downloader = backend.main_download.Downloader(self)
+        vars.singleton = self
         self.SetMainSettings()
         self.SetLeftFrame()
         self.SetRightFrame()
@@ -173,3 +175,7 @@ def searchInput(query):
         return videosSearch.result()["result"]
     except:
         return
+
+def updatedownloader():
+    vars.singleton.downloader.auto_update()
+    messagebox.showinfo("Update","exe is manually updated!")

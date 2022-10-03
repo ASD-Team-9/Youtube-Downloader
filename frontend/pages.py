@@ -13,6 +13,14 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=vars.colours["Text"])
     title.pack(anchor="nw", padx=10, pady=10)
+
+    autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
+    autoupdate.pack(anchor="nw", padx=10, pady=20)
+    autoupdate.select()
+
+    updatebutton = customtkinter.CTkButton(page, text="Update", command=Frontend.updatedownloader)
+    updatebutton.pack(anchor="nw", padx=20, pady=20)
+
     ###
     return page
 

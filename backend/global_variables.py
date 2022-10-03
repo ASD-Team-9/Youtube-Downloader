@@ -4,6 +4,8 @@ import os
 
 isUpdating = False
 
+singleton = None
+
 thumbnails = []
 
 threads = {
