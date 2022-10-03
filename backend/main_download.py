@@ -1,4 +1,8 @@
-import backend.global_variables as vars
+try:
+    import backend.global_variables as vars
+except:
+    import global_variables as vars
+
 import customtkinter
 import subprocess
 import time
