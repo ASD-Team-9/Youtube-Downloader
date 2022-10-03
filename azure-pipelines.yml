@@ -25,5 +25,5 @@ steps:
     pip install customtkinter
   displayName: 'Install dependencies'
 
-- script: python .\youtube_downloader.pyw
-  displayName: 'Running main'
+- script: python backend\backend_test.py
+  displayName: 'Running backend test'
