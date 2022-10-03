@@ -18,7 +18,7 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
 
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     def login():
-        print("Hi this is working")
+        print("Hi this is really not working")
 
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
