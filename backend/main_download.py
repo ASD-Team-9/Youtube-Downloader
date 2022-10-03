@@ -33,7 +33,6 @@ class Downloader:
                         for line in p.stdout:
                             data = line.split()
                             try:
-                                print(data)
                                 item.progress_bar.set(float(data[0].strip("%")) * 0.01)
                             except:
                                 pass
@@ -64,7 +63,7 @@ class YouTubeItem():
         self.frame = customtkinter.CTkFrame(frontend.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
         self.frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
         customtkinter.CTkLabel(self.frame, text=video_name, width=width).pack(anchor="n", pady=padding)
-        self.args = [vars.ytdlp] + args
+        self.args = args
         self.progress_bar = customtkinter.CTkProgressBar(self.frame, width=width)
         self.progress_bar.set(0)
         self.progress_bar.pack(side="top")

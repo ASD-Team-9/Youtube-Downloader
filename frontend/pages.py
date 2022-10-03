@@ -91,7 +91,7 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
         page, text="Download", image=image, compound="top",
         width=image.width() + 10, height=image.height() + 10,
         fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
-        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
+        command=lambda: frontend.Download(videoDetails["title"], [vars.ytdlp, videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
     ).pack(side="top", anchor="w")
 
     return page
