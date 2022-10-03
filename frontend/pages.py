@@ -17,11 +17,27 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     return page
 
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
+    def login():
+        print("Hi this is working")
+
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
     title.pack(anchor="nw", padx=10, pady=10)
+
+    username = customtkinter.CTkEntry(page, placeholder_text="Username")
+    username.pack(side="left")
+    username.bind("<Return>", login)
+
+    password = customtkinter.CTkEntry(page, placeholder_text="Password")
+    password.pack(side="left")
+    password.bind("<Return>", login)
+
+    customtkinter.CTkButton(
+        page, text="Login", command=login,
+        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
+    ).pack(side="left")
     ###
     return page
 
