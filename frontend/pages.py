@@ -27,6 +27,10 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     def login():
         print("Hi this is really not working")
+        user = username.get()
+        print(user)
+        pwd = password.get()
+        print(pwd)
 
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
