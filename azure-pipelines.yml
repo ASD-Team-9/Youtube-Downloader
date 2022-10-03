@@ -17,12 +17,11 @@ steps:
     pip install youtube-search-python
     pip install pillow
   displayName: 'pytest'
-  
+
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
 
-- scriptSource: inline
   script: |
     print('Hello')
