@@ -1,4 +1,3 @@
-import global_variables as vars
 import main_download
 
 def ryan_test():
