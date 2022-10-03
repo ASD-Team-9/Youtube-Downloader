@@ -15,7 +15,7 @@ def leo_test():
 
 def louis_test():
     print("Doing Louis's Test...")
-    main_download.Downloader(None)
+    main_download.Downloader()
 
 def lewis_test():
     print("Doing Lewis's Test...")
