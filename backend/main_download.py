@@ -21,6 +21,14 @@ class Downloader:
             vars.isUpdating = False
         ActionThread("auto update thread", check_updating)
 
+    """
+    Download a video by using threads
+
+    Parameters: 
+
+    video_name: The video title
+    args: The arguements/options from yt-dlp
+    """
     def download(self, video_name, args) -> None:
         def begin_downloading() -> None:
             if (vars.isUpdating):
@@ -44,6 +52,11 @@ class Downloader:
 
         self.queue.append(YouTubeItem(self.frontend, video_name, args))
         ActionThread("downloading thread", begin_downloading)
+
+    def downloadAudio():
+        # ffmpeg -i input.m4a -vn -ar 44100 -ac 2 -b:a 192k output.mp3
+        # ffmpeg -i audio.wav -acodec libmp3lame audio.mp3
+        print("Starting downloading audio")
 
 class ActionThread:
     def __init__(self, thread_name, actionDelegate) -> None:
