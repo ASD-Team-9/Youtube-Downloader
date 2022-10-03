@@ -10,6 +10,17 @@ steps:
   inputs:
     versionSpec: '3.10'
 
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python 3.10'
+
 - script: |
     pip install pytest pytest-azurepipelines
     pip install pytest-cov
@@ -17,11 +28,4 @@ steps:
     pip install youtube-search-python
     pip install pillow
   displayName: 'pytest'
-
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-
-  script: |
     print('Hello')
