@@ -5,8 +5,6 @@ import frontend.pages as Pages
 # UI
 import customtkinter
 import tkinter
-from tkinter import filedialog
-from PIL import Image, ImageTk
 
 # Services
 import youtubesearchpython as YouTube
@@ -41,10 +39,8 @@ class FrontEnd(customtkinter.CTk):
         def SetLeftTopFrame():
             leftTopFrame = customtkinter.CTkFrame(leftFrame, fg_color=vars.colours["Normal2"], height=self.height * 0.1)
             leftTopFrame.pack(side=tkinter.TOP, anchor="nw", fill=tkinter.X, padx=padding, pady=padding, ipady=padding)
-
-            logo = GetImage("Download.png").subsample(2)
-
-            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 106, height=40, placeholder_text="Search")
+            
+            self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - 134, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.AutoSearch)
             self.entry.bind("<Return>", self.SearchEntry)
@@ -144,104 +140,12 @@ class FrontEnd(customtkinter.CTk):
             vars.threads["searching thread"] = threading.Thread(target=self.thread_search, args=[search])
             vars.threads["searching thread"].start()
 
-    def GetSettingsPage(self, rightFrame) -> customtkinter.CTkFrame:
-        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
-
-        ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=colours["Text"])
-        title.pack(anchor="nw", padx=10, pady=10)
-        changeLocation = customtkinter.CTkButton(page, text="Download Location", command = self.changeDownloadLocation, fg_color=colours["ButtonNormal"])
-        changeLocation.pack(anchor="nw",padx = 10, pady=10)
-        autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
-        autoupdate.pack(anchor="nw", padx=10, pady=20)
-        autoupdate.select()
-        ###
-
-        return page
-    def changeDownloadLocation(self):
-        filename = filedialog.askdirectory(initialdir = "/", title = "Choose Dowload Location")
-        print("$Dowload Location Change:"+filename)
-        return
-
-    def GetAccountPage(self, rightFrame) -> customtkinter.CTkFrame:
-        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
-
-        ###Fill stuff in over here!
-        title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
-        title.pack(anchor="nw", padx=10, pady=10)
-        ###
-
-        return page
-
-    def GetDownloadOptionsPage(self, rightFrame) -> customtkinter.CTkFrame:
-        page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
-
-        print("Download Opitons Page run")
-        ###
-        title = customtkinter.CTkLabel(page, textvariable=self.searchedVideoTitle)
-        title.configure(font=("Helvetica", 18))
-        title.pack(anchor="nw", padx=10, pady=10)
-
-        imageTitle = tkinter.Label(page, image=self.searchedVideoImageURL.get())
-
-        def updateImage(*args):
-            print("Updating image: " + self.searchedVideoImageURL.get())
-            fetchImage = GetImageFromURL(self.searchedVideoImageURL.get())
-            imageTitle.configure(image=fetchImage)
-            imageTitle.image = fetchImage
-            imageTitle.pack(anchor="nw", padx=10, pady=10)
-
-        self.searchedVideoImageURL.trace('w', updateImage)
-        ###
-
-        optionTitle = customtkinter.CTkLabel(page, text="Options")
-        optionTitle.pack(anchor="nw", padx=5, pady=5)
-
-        # DOWNLOAD TYPE OPTIONS
-        self.downloadOptions = ['mp4', 'mp3']
-        self.downloadOption_var = tkinter.StringVar(self)
-        def downloadOptionChanged(*args):
-            print("Download Option Change" + self.downloadOption_var.get())
-        downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.downloadOption_var, values=self.downloadOptions, command=downloadOptionChanged)
-        downloadOptionsBar.set('mp4')
-        downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
-
-        # D
-        self.videoQualityOptions = ['1080p', '720p', '480p', '360p']
-        self.videoQualityOption_var = tkinter.StringVar(self)
-        def videoQualityChanged(*args):
-            print("Quality change" + self.videoQualityOption_var.get())
-        videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.videoQualityOption_var, values=self.videoQualityOptions, command=videoQualityChanged)
-        videoQualityOptionsBar.set('1080p')
-        videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10)
-
-        return page
-
-    def GetClipboard(self, event): #This is used as a delegate, the event parameter is needed.
+    def thread_search(self, userInput):
+        nextPage = None
         try:
-            self.entry.delete(0, tkinter.END)
-            self.entry.insert(0, self.clipboard_get())
-        except:
-            pass
-
-    def HandleSearchChanged(self):
-        text = self.entry.get()
-        print("Handle Search Change: " + text)
-        if len(self.entry.get()) == 0:
-            print("Empty text")
-            self.ChangePage("Browser Page")
-            return
-
-        if text != "":
-            print("Have text")
-            self.ChangePage("Download Options Page")
-            self.searchedVideo = self.getVideo(self.entry.get())
-
-            # print(self.searchedVideo)
-            if (self.searchedVideo != None):
-                print(self.searchedVideo["title"])
-                self.searchedVideoTitle.set(self.searchedVideo["title"])
-                self.searchedVideoImageURL.set(self.searchedVideo["thumbnails"][0]["url"])
+            if vars.regex.fullmatch(userInput):
+                nextPage = "Video Details Page"
+                self.pages[nextPage] = Pages.GetVideoDetailsPage(self, False, searchURL(userInput))
             else:
                 raise
         except:
@@ -263,11 +167,9 @@ def searchURL(url):
     except:
         return
 
-def GetImageFromURL(url):
-    if url == "": return
-    u = urlopen(url)
-    raw_data = u.read()
-    u.close()
-
-    im = Image.open(BytesIO(raw_data))
-    return ImageTk.PhotoImage(im)
+def searchInput(query):
+    try:
+        videosSearch = YouTube.VideosSearch(query, limit = 20)
+        return videosSearch.result()["result"]
+    except:
+        return
