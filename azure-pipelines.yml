@@ -3,7 +3,7 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
-  
+
 steps:
 - task: UsePythonVersion@0
   displayName: 'Using Python Version 3.10'
@@ -17,14 +17,8 @@ steps:
     pip install youtube-search-python
     pip install pillow
   displayName: 'pytest'
-
-  - task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testResultsFiles: '**/test-*.xml'
-    testRunTitle: 'Publish test results for Python 3.10'
-
-    - task: PublishCodeCoverageResults@1
+  
+- task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
