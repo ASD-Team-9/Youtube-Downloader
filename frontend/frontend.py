@@ -3,6 +3,7 @@ import backend.main_download
 # UI
 import customtkinter
 import tkinter
+from tkinter import filedialog
 from PIL import Image, ImageTk
 
 # Services
@@ -55,7 +56,7 @@ class FrontEnd(customtkinter.CTk):
         def SetLeftTopFrame():
             leftTopFrame = customtkinter.CTkFrame(leftFrame, fg_color=colours["Normal2"], height=self.height * 0.1)
             leftTopFrame.pack(side=tkinter.TOP, anchor="nw", fill=tkinter.X, padx=padding, pady=padding, ipady=padding)
-            
+
             logo = GetImage("Download.png").subsample(2)
 
             self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - logo.width() - 106, height=40, placeholder_text="Search")
@@ -87,7 +88,7 @@ class FrontEnd(customtkinter.CTk):
             self.scrollable_frame = tkinter.Frame(self.canvas, bg=colours["Normal2"])
             self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
             self.scrollable_frame.pack(fill="both", expand=True)
-            
+
             self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
             self.canvas.configure(yscrollcommand=scrollbar.set, bg=colours["Normal2"])
             self.canvas.pack(side="left", fill="both", expand=True, padx=(padding, 0), pady=padding)
@@ -130,7 +131,7 @@ class FrontEnd(customtkinter.CTk):
 
     def ChangePage(self, page) -> None:
         self.currentPage.forget()
-    
+
         # if page == "Download Options Page":
         #     self.currentPage.grid_forget()
         #     self.currentPage.pack_forget()
@@ -154,12 +155,18 @@ class FrontEnd(customtkinter.CTk):
         ###Fill stuff in over here!
         title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=colours["Text"])
         title.pack(anchor="nw", padx=10, pady=10)
+        changeLocation = customtkinter.CTkButton(page, text="Download Location", command = self.changeDownloadLocation, fg_color=colours["ButtonNormal"])
+        changeLocation.pack(anchor="nw",padx = 10, pady=10)
         autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
         autoupdate.pack(anchor="nw", padx=10, pady=20)
         autoupdate.select()
         ###
 
         return page
+    def changeDownloadLocation(self):
+        filename = filedialog.askdirectory(initialdir = "/", title = "Choose Dowload Location")
+        print("$Dowload Location Change:"+filename)
+        return
 
     def GetAccountPage(self, rightFrame) -> customtkinter.CTkFrame:
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
@@ -173,7 +180,7 @@ class FrontEnd(customtkinter.CTk):
 
     def GetDownloadOptionsPage(self, rightFrame) -> customtkinter.CTkFrame:
         page = customtkinter.CTkFrame(rightFrame, corner_radius=0)
-        
+
         print("Download Opitons Page run")
         ###
         title = customtkinter.CTkLabel(page, textvariable=self.searchedVideoTitle)
@@ -211,7 +218,7 @@ class FrontEnd(customtkinter.CTk):
             print("Quality change" + self.videoQualityOption_var.get())
         videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.videoQualityOption_var, values=self.videoQualityOptions, command=videoQualityChanged)
         videoQualityOptionsBar.set('1080p')
-        videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+        videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10)
 
         return page
 
@@ -234,7 +241,7 @@ class FrontEnd(customtkinter.CTk):
             print("Have text")
             self.ChangePage("Download Options Page")
             self.searchedVideo = self.getVideo(self.entry.get())
-            
+
             # print(self.searchedVideo)
             if (self.searchedVideo != None):
                 print(self.searchedVideo["title"])
@@ -278,5 +285,3 @@ def GetImageFromURL(url):
 
     im = Image.open(BytesIO(raw_data))
     return ImageTk.PhotoImage(im)
-
-
