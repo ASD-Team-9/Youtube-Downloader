@@ -22,3 +22,4 @@ if __name__ == "__main__":
     louis_test()
     lewis_test()
     johnny_test()
+    print("Successfully pass all tests")

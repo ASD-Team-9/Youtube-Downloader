@@ -59,32 +59,55 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
     thumbnail = customtkinter.CTkLabel(page, image=vars.thumbnails[0].thumbnail)
     thumbnail.pack(anchor="nw", side="top")
 
-    defaultargs = ["-o", "%(title)s.%(ext)s", "--progress-template", "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"]
-
+    progressArgs = ["-o", "%(title)s.%(ext)s", "--progress-template", "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"]
     ## DOWNLOAD TYPE OPTIONS
-    downloadOptions = ['mp4', 'mp3']
+
+    # Download Type Dropdown
+    downloadOptions = ['mp4', 'm4a', 'mp3']
     downloadOption_var = customtkinter.StringVar()
     def downloadOptionChanged(*args):
         print("Download Option Change: " + downloadOption_var.get())
+        updateQualityArgs()
     downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=downloadOption_var, values=downloadOptions, command=downloadOptionChanged)
     downloadOptionsBar.set('mp4')
     downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
 
-    videoQualityOptions = ['1080p', '720p', '480p', '360p']
-    videoQualityOption_var = customtkinter.StringVar()
-    def videoQualityChanged(*args):
-        print("Quality change: " + videoQualityOption_var.get())
-    videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=videoQualityOption_var, values=videoQualityOptions, command=videoQualityChanged)
-    videoQualityOptionsBar.set('1080p')
-    videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+    # Quality Dropdown Options
+    qualityOptions = ['highest', 'medium', 'low', 'lowest']
+    qualityOption_var = customtkinter.StringVar()
+    def qualityChanged(*args):
+        print("Quality change: " + qualityOption_var.get())
+        updateQualityArgs()
+    qualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=qualityOption_var, values=qualityOptions, command=qualityChanged)
+    qualityOptionsBar.set('highest')
+    qualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+
+    # Process args for YT-DLP
+    def updateQualityArgs():
+        qualityArgs = []
+        if downloadOption_var.get() == "mp4":
+            # if qualityOption_var.get() == "highest": qualityArgs = ["-f", "bestvideo"]
+            if qualityOption_var.get() == "medium": qualityArgs = ["-f", "136"]
+            elif qualityOption_var.get() == "low" : qualityArgs = ["-f", "135"]
+            elif qualityOption_var.get() == "lowest" : qualityArgs = ["-f", "160"]
+            else: qualityArgs.append("bestvideo")
+        elif downloadOption_var.get() == "m4a":
+            if qualityOption_var.get() == "highest": qualityArgs = ["-f", "140"]
+            else: qualityArgs = ["-f", "139"]
+        elif downloadOption_var.get() == "mp3":
+            #TODO get mp3 with ffmpeg
+            if qualityOption_var.get() == "highest":  qualityArgs = ["-f", "139", "--"]
+            else: qualityArgs = ["-f", "139"]
+        
+        return qualityArgs
 
     image = Frontend.GetImage("Download.png")
     customtkinter.CTkButton(
         page, text="Download", image=image, compound="top",
         width=image.width() + 10, height=image.height() + 10,
         fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
-        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
-    ).pack(side="top", anchor="w")
+        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + progressArgs + updateQualityArgs()) #TODO: Last argument is where you combine all preferences + path + etc.
+    ).pack(side="top", anchor="s", fill=customtkinter.X)
 
     return page
 

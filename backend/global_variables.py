@@ -31,3 +31,9 @@ def GetPath():
     program = "yt-dlp_macos" if platform.system() == "Darwin" else "yt-dlp.exe"
     return f"{path}/../resources/{program}"
 ytdlp = GetPath()
+
+def GetFfmpeg():
+    path = os.path.abspath(os.path.dirname(__file__))
+    program = "ffmpeg" if platform.system() == "Darwin" else "ffmpeg.exe"
+    return f"{path}/../resources/{program}"
+ffmpeg = GetFfmpeg()
