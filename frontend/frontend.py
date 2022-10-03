@@ -94,7 +94,7 @@ class FrontEnd(customtkinter.CTk):
                     text="", command=command
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
             ImageButtons("SettingsIcon.png", 3, lambda: self.ChangePage("Settings Page")) #Example...
-            ImageButtons("Logo.png", 1, lambda: self.ChangePage("Account Page"))
+            ImageButtons("Logo.png", 83, lambda: self.ChangePage("Account Page"))
         SetLeftBottomFrame()
 
     def SetRightFrame(self) -> None:
