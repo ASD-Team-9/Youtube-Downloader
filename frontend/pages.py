@@ -1,5 +1,6 @@
 import backend.global_variables as vars
 import customtkinter
+from tkinter import messagebox
 
 from PIL import Image, ImageTk
 from urllib.request import urlopen
@@ -25,6 +26,8 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     return page
 
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+
     def login():
         f = open("resources/logins.txt", "r")
         correctUser = f.readline().strip()
@@ -33,14 +36,16 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
         user = username.get()
         pwd = password.get()
         if correctUser == user and correctPass == pwd:
-            print("Login is successful")
+            messagebox.showinfo("Login","Login is successful")
+            title.destroy()
+            username.destroy()
+            password.destroy()
+            loginButton.destroy()
+            newTitle = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
+            newTitle.pack(anchor="nw", padx=10, pady=10)
         else:
-            print("Login unsuccessful try again")
-        
+            messagebox.showinfo("Login","Login unsuccessful try again")
 
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-
-    ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
     title.pack(anchor="nw", padx=10, pady=10)
 
@@ -48,15 +53,16 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     username.pack(side="top",anchor="nw", padx=10)
     username.bind("<Return>", login)
 
-    password = customtkinter.CTkEntry(page, placeholder_text="Password")
+    password = customtkinter.CTkEntry(page, placeholder_text="Password", show="*")
     password.pack(side="top",anchor="nw", padx=10,pady=10)
     password.bind("<Return>", login)
 
-    customtkinter.CTkButton(
+    loginButton = customtkinter.CTkButton(
         page, text="Login", command=login,
         fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
-    ).pack(side="top",anchor="nw", padx=10)
-    ###
+    )
+    loginButton.pack(side="top",anchor="nw", padx=10)
+
     return page
 
 def GetBrowserPage(frontend, searchResults) -> customtkinter.CTkFrame:
