@@ -1,4 +1,3 @@
-from http.client import OK
 import backend.global_variables as vars
 import backend.main_download
 import frontend.pages as Pages
@@ -6,6 +5,7 @@ import frontend.pages as Pages
 # UI
 import customtkinter
 import tkinter
+from tkinter import messagebox
 
 # Services
 import youtubesearchpython as YouTube
@@ -15,6 +15,7 @@ class FrontEnd(customtkinter.CTk):
     def __init__(self) -> None:
         super().__init__()
         self.downloader = backend.main_download.Downloader(self)
+        vars.singleton = self
         self.SetMainSettings()
         self.SetLeftFrame()
         self.SetRightFrame()
@@ -176,8 +177,5 @@ def searchInput(query):
         return
 
 def updatedownloader():
-    try:
-        backend.main_download.Downloader.auto_update
-        tkinter.messagebox.showinfo("Update","exe is manually updated!")
-    except:
-        return
+    vars.singleton.downloader.auto_update()
+    messagebox.showinfo("Update","exe is manually updated!")
