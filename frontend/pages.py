@@ -27,11 +27,11 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     title.pack(anchor="nw", padx=10, pady=10)
 
     username = customtkinter.CTkEntry(page, placeholder_text="Username")
-    username.pack(side="left")
+    username.pack(side="left",anchor="n")
     username.bind("<Return>", login)
 
     password = customtkinter.CTkEntry(page, placeholder_text="Password")
-    password.pack(side="left")
+    password.pack(side="left",anchor="n")
     password.bind("<Return>", login)
 
     customtkinter.CTkButton(
