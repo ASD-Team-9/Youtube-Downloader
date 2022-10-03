@@ -9,21 +9,18 @@ import time
 import threading
 
 class Downloader:
-    def __init__(self, frontend) -> None:
-        self.frontend = frontend
+    def __init__(self) -> None:
         self.queue = []
-        self.auto_update()
+        self.auto_update() #TODO: Read from preferences and choose to auto update or not.
 
     def auto_update(self):
         def check_updating():
-            vars.isUpdating = True
             subprocess.run([vars.ytdlp, "-U"])
-            vars.isUpdating = False
         ActionThread("auto update thread", check_updating)
 
     def download(self, video_name, args) -> None:
         def begin_downloading() -> None:
-            if (vars.isUpdating):
+            if (vars.threads["auto update thread"] != None):
                 time.sleep(0)
 
             while len(self.queue) > 0: #I'm under the assumption that we are using only one thread to download.
@@ -41,7 +38,7 @@ class Downloader:
                 except:
                     print("An Error occured")
 
-        self.queue.append(YouTubeItem(self.frontend, video_name, args))
+        self.queue.append(YouTubeItem(video_name, args))
         ActionThread("downloading thread", begin_downloading)
 
 class ActionThread:
@@ -57,10 +54,10 @@ class ActionThread:
             vars.threads[thread_name].start()
 
 class YouTubeItem():
-    def __init__(self, frontend, video_name, args) -> None:
+    def __init__(self, video_name, args) -> None:
         padding = 10
-        width = frontend.canvas.winfo_width() - 27
-        self.frame = customtkinter.CTkFrame(frontend.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
+        width = vars.globalFrontend.canvas.winfo_width() - 27
+        self.frame = customtkinter.CTkFrame(vars.globalFrontend.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
         self.frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
         customtkinter.CTkLabel(self.frame, text=video_name, width=width).pack(anchor="n", pady=padding)
         self.args = args
@@ -68,7 +65,7 @@ class YouTubeItem():
         self.progress_bar.set(0)
         self.progress_bar.pack(side="top")
 
-    def finished(self) -> None:
+    def finished(self, success) -> None:
         pass #TODO Add a remove icon button that calls self.remove()
 
     def remove(self) -> None:

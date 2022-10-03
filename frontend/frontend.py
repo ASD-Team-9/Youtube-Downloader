@@ -13,13 +13,14 @@ import threading
 
 class FrontEnd(customtkinter.CTk):
     def __init__(self) -> None:
-        super().__init__()
-        self.downloader = backend.main_download.Downloader(self)
-        vars.singleton = self
-        self.SetMainSettings()
-        self.SetLeftFrame()
-        self.SetRightFrame()
-        self.mainloop()
+        if (vars.globalFrontend == None):
+            super().__init__()
+            self.downloader = backend.main_download.Downloader()
+            vars.globalFrontend = self
+            self.SetMainSettings()
+            self.SetLeftFrame()
+            self.SetRightFrame()
+            self.mainloop()
 
     def SetMainSettings(self) -> None:
         self.width = 1280
@@ -104,8 +105,8 @@ class FrontEnd(customtkinter.CTk):
         customtkinter.CTkFrame(self.rightFrame, height=0, width = self.width * 2 / 3, corner_radius=0).pack(anchor="nw") #fill
 
         self.pages = {
-            "Settings Page" : Pages.GetSettingsPage(self),
-            "Account Page" : Pages.GetAccountPage(self),
+            "Settings Page" : Pages.GetSettingsPage(),
+            "Account Page" : Pages.GetAccountPage(),
             "Unknown Page" : customtkinter.CTkFrame(self.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
             #Add pages here...
             #"Page Name" : methodOfPage(rightFrame)
@@ -147,12 +148,12 @@ class FrontEnd(customtkinter.CTk):
         try:
             if vars.regex.fullmatch(userInput):
                 nextPage = "Video Details Page"
-                self.pages[nextPage] = Pages.GetVideoDetailsPage(self, False, searchURL(userInput))
+                self.pages[nextPage] = Pages.GetVideoDetailsPage(False, searchURL(userInput))
             else:
                 raise
         except:
             nextPage = "Browser Page"
-            self.pages[nextPage] = Pages.GetBrowserPage(self, searchInput(userInput))
+            self.pages[nextPage] = Pages.GetBrowserPage(searchInput(userInput))
         self.ChangePage(nextPage)
         vars.threads["searching thread"] = None
 
@@ -177,5 +178,5 @@ def searchInput(query):
         return
 
 def updatedownloader():
-    vars.singleton.downloader.auto_update()
+    vars.globalFrontend.downloader.auto_update()
     messagebox.showinfo("Update","exe is manually updated!")
