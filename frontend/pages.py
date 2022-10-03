@@ -52,25 +52,23 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
         fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
         command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + defaultargs) #TODO: Last argument is where you combine all preferences + path + etc.
     ).pack(side="top", anchor="w")
-    ###
 
-    # # DOWNLOAD TYPE OPTIONS
-    # self.downloadOptions = ['mp4', 'mp3']
-    # self.downloadOption_var = tkinter.StringVar(self)
-    # def downloadOptionChanged(*args):
-    #     print("Download Option Change" + self.downloadOption_var.get())
-    # downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.downloadOption_var, values=self.downloadOptions, command=downloadOptionChanged)
-    # downloadOptionsBar.set('mp4')
-    # downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
+    ## DOWNLOAD TYPE OPTIONS
+    downloadOptions = ['mp4', 'mp3']
+    downloadOption_var = customtkinter.StringVar()
+    def downloadOptionChanged(*args):
+        print("Download Option Change: " + downloadOption_var.get())
+    downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=downloadOption_var, values=downloadOptions, command=downloadOptionChanged)
+    downloadOptionsBar.set('mp4')
+    downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
 
-    # # D
-    # self.videoQualityOptions = ['1080p', '720p', '480p', '360p']
-    # self.videoQualityOption_var = tkinter.StringVar(self)
-    # def videoQualityChanged(*args):
-    #     print("Quality change" + self.videoQualityOption_var.get())
-    # videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=self.videoQualityOption_var, values=self.videoQualityOptions, command=videoQualityChanged)
-    # videoQualityOptionsBar.set('1080p')
-    # videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+    videoQualityOptions = ['1080p', '720p', '480p', '360p']
+    videoQualityOption_var = customtkinter.StringVar()
+    def videoQualityChanged(*args):
+        print("Quality change: " + videoQualityOption_var.get())
+    videoQualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=videoQualityOption_var, values=videoQualityOptions, command=videoQualityChanged)
+    videoQualityOptionsBar.set('1080p')
+    videoQualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
 
     return page
 
