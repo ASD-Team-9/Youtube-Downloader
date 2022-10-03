@@ -18,7 +18,7 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     autoupdate.pack(anchor="nw", padx=10, pady=20)
     autoupdate.select()
 
-    updatebutton = customtkinter.CTkButton(page, text="Update")
+    updatebutton = customtkinter.CTkButton(page, text="Update", command=Frontend.updatedownloader)
     updatebutton.pack(anchor="nw", padx=20, pady=20)
 
     ###

@@ -1,3 +1,4 @@
+from http.client import OK
 import backend.global_variables as vars
 import backend.main_download
 import frontend.pages as Pages
@@ -171,5 +172,12 @@ def searchInput(query):
     try:
         videosSearch = YouTube.VideosSearch(query, limit = 20)
         return videosSearch.result()["result"]
+    except:
+        return
+
+def updatedownloader():
+    try:
+        backend.main_download.Downloader.auto_update
+        tkinter.messagebox.showinfo("Update","exe is manually updated!")
     except:
         return
