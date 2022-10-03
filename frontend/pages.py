@@ -26,11 +26,17 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
 
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     def login():
-        print("Hi this is really not working")
+        f = open("resources/logins.txt", "r")
+        correctUser = f.readline().strip()
+        correctPass = f.readline().strip()
+        f.close()
         user = username.get()
-        print(user)
         pwd = password.get()
-        print(pwd)
+        if correctUser == user and correctPass == pwd:
+            print("Login is successful")
+        else:
+            print("Login unsuccessful try again")
+        
 
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
