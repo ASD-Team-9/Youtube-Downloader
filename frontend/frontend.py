@@ -5,6 +5,7 @@ import frontend.pages as Pages
 # UI
 import customtkinter
 import tkinter
+from tkinter import filedialog
 from tkinter import messagebox
 
 # Services
@@ -41,7 +42,7 @@ class FrontEnd(customtkinter.CTk):
         def SetLeftTopFrame():
             leftTopFrame = customtkinter.CTkFrame(leftFrame, fg_color=vars.colours["Normal2"], height=self.height * 0.1)
             leftTopFrame.pack(side=tkinter.TOP, anchor="nw", fill=tkinter.X, padx=padding, pady=padding, ipady=padding)
-            
+
             self.entry = customtkinter.CTkEntry(leftTopFrame, width=leftFrameWidth - 134, height=40, placeholder_text="Search")
             self.entry.pack(side="left", padx=(padding, 0))
             self.entry.bind("<Enter>", self.AutoSearch)
@@ -179,3 +180,16 @@ def searchInput(query):
 def updatedownloader():
     vars.singleton.downloader.auto_update()
     messagebox.showinfo("Update","exe is manually updated!")
+
+def changeDownloadLocation():
+    newLocation = tkinter.filedialog.askdirectory(initialdir=vars.dowloadLocation)
+    if(newLocation != ""):
+        vars.dowloadLocation = newLocation
+        print("Download Location is: " + vars.dowloadLocation)
+
+    return
+def changeColour(choice):
+    vars.changeColourSet(choice)
+    print("colour set to: "+choice)
+    print(vars.colours["ButtonNormal"])
+    return
