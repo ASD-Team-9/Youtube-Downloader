@@ -77,6 +77,9 @@ def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
 
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
+    title = customtkinter.CTkLabel(page, text="Create a New Account", fg_color="#321321")
+    title.pack(anchor="nw", padx=10, pady=10)
+
     newUsername = customtkinter.CTkEntry(page, placeholder_text="New Username")
     newUsername.pack(side="top",anchor="nw", padx=10)
     newUsername.bind("<Return>", CreateAccount)
