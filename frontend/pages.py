@@ -41,6 +41,7 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
                 username.destroy()
                 password.destroy()
                 loginButton.destroy()
+                createAccButton.destroy()
                 newTitle = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
                 newTitle.pack(anchor="nw", padx=10, pady=10)
             else:
@@ -75,7 +76,10 @@ def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
     def createAccount():
         newUser = newUsername.get()
         newPass = newPassword.get()
-        
+        fo = open("resources/logins.txt","a")
+        fo.write(newUser + "\n")
+        fo.write(newPass + "\n")
+        fo.close()
         messagebox.showinfo("Create New Account","Account Created!")
 
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
