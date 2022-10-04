@@ -21,7 +21,7 @@ class Downloader:
     """
     Download a video by using threads
 
-    Parameters: 
+    Parameters:
 
     video_name: The video title
     args: The arguements/options from yt-dlp
@@ -43,7 +43,8 @@ class Downloader:
                                 pass
                     if p.returncode != 0:
                         raise
-                except:
+                except Exception as e:
+                    print(item.args)
                     print("An Error occured")
 
         self.queue.append(YouTubeItem(video_name, args))
@@ -60,7 +61,7 @@ class ActionThread:
         def thread_action():
             self.actionDelegate()
             vars.threads[self.name] = None
-            
+
         if (vars.threads[thread_name] == None):
             self.name = thread_name
             self.actionDelegate = actionDelegate

@@ -9,8 +9,8 @@ from io import BytesIO
 
 import frontend.frontend as Frontend
 
-def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+def GetSettingsPage() -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(vars.globalFrontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
     title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=vars.colours["Text"])
     title.pack(anchor="nw", padx=10, pady=10)
     autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
@@ -31,30 +31,28 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     colourChoice.set("Normal")
     return page
 
+def GetAccountPage() -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(vars.globalFrontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
-
-def GetAccountPage(frontend) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-    
     def login():
-            f = open("resources/logins.txt", "r")
-            correctUser = f.readline().strip()
-            correctPass = f.readline().strip()
-            f.close()
-            user = username.get()
-            pwd = password.get()
-            if correctUser == user and correctPass == pwd:
-                messagebox.showinfo("Login","Login is successful")
-                title.destroy()
-                username.destroy()
-                password.destroy()
-                loginButton.destroy()
-                createAccButton.destroy()
-                newTitle = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
-                newTitle.pack(anchor="nw", padx=10, pady=10)
-            else:
-                messagebox.showinfo("Login","Login unsuccessful try again")
-   
+        f = open("resources/logins.txt", "r")
+        correctUser = f.readline().strip()
+        correctPass = f.readline().strip()
+        f.close()
+        user = username.get()
+        pwd = password.get()
+        if correctUser == user and correctPass == pwd:
+            messagebox.showinfo("Login","Login is successful")
+            title.destroy()
+            username.destroy()
+            password.destroy()
+            loginButton.destroy()
+            createAccButton.destroy()
+            newTitle = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
+            newTitle.pack(anchor="nw", padx=10, pady=10)
+        else:
+            messagebox.showinfo("Login","Login unsuccessful try again")
+
     title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
     title.pack(anchor="nw", padx=10, pady=10)
 
@@ -73,14 +71,14 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     loginButton.pack(side="top",anchor="nw", padx=10)
 
     createAccButton = customtkinter.CTkButton(
-        page, text="Create Account", command=lambda: vars.singleton.ChangePage("New Account Page"),
+        page, text="Create Account", command=lambda: vars.globalFrontend.ChangePage("New Account Page"),
         fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
     )
     createAccButton.pack(side="top",anchor="nw", padx=10, pady=5)
 
     return page
 
-def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
+def GetNewAccountPage() -> customtkinter.CTkFrame:
     def createAccount():
         newUser = newUsername.get()
         newPass = newPassword.get()
@@ -90,7 +88,7 @@ def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
         fo.close()
         messagebox.showinfo("Create New Account","Account Created!")
 
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+    page = customtkinter.CTkFrame(vars.globalFrontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     title = customtkinter.CTkLabel(page, text="Create a New Account", fg_color="#321321")
     title.pack(anchor="nw", padx=10, pady=10)
@@ -111,8 +109,8 @@ def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
 
     return page
 
-def GetBrowserPage(frontend, searchResults) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+def GetBrowserPage(searchResults) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(vars.globalFrontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     for video in searchResults:
         for key in ["title", "duration", "thumbnails", "link"]:
@@ -120,8 +118,8 @@ def GetBrowserPage(frontend, searchResults) -> customtkinter.CTkFrame:
             title.pack(anchor="nw", padx=10, pady=10)
     return page
 
-def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+def GetVideoDetailsPage(cameFromBrowserPage, videoDetails) -> customtkinter.CTkFrame:
+    page = customtkinter.CTkFrame(vars.globalFrontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
     customtkinter.CTkLabel(page, text=videoDetails["title"], fg_color="#321321").pack(anchor="nw", padx=10, pady=10)
 
@@ -176,7 +174,7 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
         page, text="Download", image=image, compound="top",
         width=image.width() + 10, height=image.height() + 10,
         fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
-        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + progressArgs + updateQualityArgs()) #TODO: Last argument is where you combine all preferences + path + etc.
+        command=lambda: vars.globalFrontend.Download(videoDetails["title"], [vars.ytdlp, videoDetails["link"]] + progressArgs + updateQualityArgs()) #TODO: Last argument is where you combine all preferences + path + etc.
     ).pack(side="top", anchor="s", fill=customtkinter.X)
 
     return page

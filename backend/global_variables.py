@@ -20,7 +20,7 @@ colours = {
     "Normal": "#33363B",
     "Normal2": "#292b2f",
     "Dark": "#202225",
-    "ButtonNormal": "#68B0AB",
+    "ButtonNormal": "#36393f",
     "ButtonHover": "#5865f2",
     "ButtonHover2": "#3ba55d",
     "Text": "#b9bbbe",
