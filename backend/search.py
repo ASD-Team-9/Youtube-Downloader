@@ -6,13 +6,11 @@ except:
 import re
 import string
 
+videoRegex = re.compile(r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$")
 def isVideoURL(string: str):
-  regex = re.compile(r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$")
-  return regex.fullmatch(string)
+  return videoRegex.fullmatch(string)
 
-
-def isPlayistURL(string: str):
-  regex = re.compile(
+playistRegex = re.compile(
     """
     ^(https|http):\/\/(?:www\.)?youtube\.com\/watch\?
     (?:&.*)*                           #extra params at the beginning
@@ -33,8 +31,11 @@ def isPlayistURL(string: str):
     (?:\#.*)*$     
     """
     )
-  # regex = re.compile("/^http:\/\/(?:www\.)?youtube\.com\/watch\?((v=[^&\s]*&list=[^&\s]*)|(list=[^&\s]*&v=[^&\s]*))(&[^&\s]*)*$/")
-  return regex.fullmatch(string)
+
+# regex = re.compile("/^http:\/\/(?:www\.)?youtube\.com\/watch\?((v=[^&\s]*&list=[^&\s]*)|(list=[^&\s]*&v=[^&\s]*))(&[^&\s]*)*$/")
+
+def isPlayistURL(string: str):
+  return playistRegex.fullmatch(string)
 
 
 def getVideoInfo(url):
