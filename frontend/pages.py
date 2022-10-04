@@ -1,5 +1,6 @@
 import backend.global_variables as vars
 import customtkinter
+import tkinter
 from tkinter import messagebox
 
 from PIL import Image, ImageTk
@@ -10,7 +11,6 @@ import frontend.frontend as Frontend
 
 def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-    ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=vars.colours["Text"])
     title.pack(anchor="nw", padx=10, pady=10)
     autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
@@ -19,10 +19,16 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     updatebutton = customtkinter.CTkButton(page, text="Update", command=Frontend.updatedownloader, fg_color=vars.colours["ButtonNormal"])
     updatebutton.pack(anchor="nw", padx=20, pady=20)
     changeLocation = customtkinter.CTkButton(page,
-        text="Download Location", command =
+        text="Change Download Location", command =
         Frontend.changeDownloadLocation, fg_color=vars.colours["ButtonNormal"])
-    changeLocation.pack(anchor="nw",padx = 20, pady=20)
-    ###
+    changeLocation.pack(anchor="nw", padx=20, pady=20)
+    colourChoiceLable = customtkinter.CTkLabel(page, text="Choose Colour Scheme:")
+    colourChoiceLable.pack(anchor="nw", padx=20, pady=20)
+    colourChoice = customtkinter.CTkOptionMenu(master=page,
+        values=["Normal", "Green"],
+        command=Frontend.changeColour)
+    colourChoice.pack(anchor="nw", padx=20, pady=10)
+    colourChoice.set("Normal")
     return page
 
 

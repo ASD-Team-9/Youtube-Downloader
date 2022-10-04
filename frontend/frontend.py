@@ -188,3 +188,8 @@ def changeDownloadLocation():
         print("Download Location is: " + vars.dowloadLocation)
 
     return
+def changeColour(choice):
+    vars.changeColourSet(choice)
+    print("colour set to: "+choice)
+    print(vars.colours["ButtonNormal"])
+    return
