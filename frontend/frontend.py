@@ -106,8 +106,9 @@ class FrontEnd(customtkinter.CTk):
         customtkinter.CTkFrame(self.rightFrame, height=0, width = self.width * 2 / 3, corner_radius=0).pack(anchor="nw") #fill
 
         self.pages = {
-            "Settings Page" : Pages.GetSettingsPage(),
-            "Account Page" : Pages.GetAccountPage(),
+            "Settings Page" : Pages.GetSettingsPage(self),
+            "Account Page" : Pages.GetAccountPage(self),
+            "New Account Page" : Pages.GetNewAccountPage(self),
             "Unknown Page" : customtkinter.CTkFrame(self.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
             #Add pages here...
             #"Page Name" : methodOfPage(rightFrame)

@@ -35,25 +35,26 @@ def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
 
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-
+    
     def login():
-        f = open("resources/logins.txt", "r")
-        correctUser = f.readline().strip()
-        correctPass = f.readline().strip()
-        f.close()
-        user = username.get()
-        pwd = password.get()
-        if correctUser == user and correctPass == pwd:
-            messagebox.showinfo("Login","Login is successful")
-            title.destroy()
-            username.destroy()
-            password.destroy()
-            loginButton.destroy()
-            newTitle = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
-            newTitle.pack(anchor="nw", padx=10, pady=10)
-        else:
-            messagebox.showinfo("Login","Login unsuccessful try again")
-
+            f = open("resources/logins.txt", "r")
+            correctUser = f.readline().strip()
+            correctPass = f.readline().strip()
+            f.close()
+            user = username.get()
+            pwd = password.get()
+            if correctUser == user and correctPass == pwd:
+                messagebox.showinfo("Login","Login is successful")
+                title.destroy()
+                username.destroy()
+                password.destroy()
+                loginButton.destroy()
+                createAccButton.destroy()
+                newTitle = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
+                newTitle.pack(anchor="nw", padx=10, pady=10)
+            else:
+                messagebox.showinfo("Login","Login unsuccessful try again")
+   
     title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
     title.pack(anchor="nw", padx=10, pady=10)
 
@@ -70,6 +71,43 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
         fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
     )
     loginButton.pack(side="top",anchor="nw", padx=10)
+
+    createAccButton = customtkinter.CTkButton(
+        page, text="Create Account", command=lambda: vars.singleton.ChangePage("New Account Page"),
+        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
+    )
+    createAccButton.pack(side="top",anchor="nw", padx=10, pady=5)
+
+    return page
+
+def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
+    def createAccount():
+        newUser = newUsername.get()
+        newPass = newPassword.get()
+        fo = open("resources/logins.txt","a")
+        fo.write(newUser + "\n")
+        fo.write(newPass + "\n")
+        fo.close()
+        messagebox.showinfo("Create New Account","Account Created!")
+
+    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+
+    title = customtkinter.CTkLabel(page, text="Create a New Account", fg_color="#321321")
+    title.pack(anchor="nw", padx=10, pady=10)
+
+    newUsername = customtkinter.CTkEntry(page, placeholder_text="New Username")
+    newUsername.pack(side="top",anchor="nw", padx=10)
+    newUsername.bind("<Return>", createAccount)
+
+    newPassword = customtkinter.CTkEntry(page, placeholder_text="New Password")
+    newPassword.pack(side="top",anchor="nw", padx=10,pady=10)
+    newPassword.bind("<Return>", createAccount)
+
+    createButton = customtkinter.CTkButton(
+        page, text="Create Account", command=createAccount,
+        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
+    )
+    createButton.pack(side="top",anchor="nw", padx=10)
 
     return page
 
