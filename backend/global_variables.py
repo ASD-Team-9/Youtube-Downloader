@@ -39,3 +39,5 @@ def GetFfmpeg():
     program = "ffmpeg" if platform.system() == "Darwin" else "ffmpeg.exe"
     return f"{path}/../resources/{program}"
 ffmpeg = GetFfmpeg()
+
+dowloadLocation = os.path.abspath(os.path.dirname(__file__))

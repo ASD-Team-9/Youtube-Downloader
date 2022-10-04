@@ -10,20 +10,22 @@ import frontend.frontend as Frontend
 
 def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-
     ###Fill stuff in over here!
     title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=vars.colours["Text"])
     title.pack(anchor="nw", padx=10, pady=10)
-
     autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
     autoupdate.pack(anchor="nw", padx=10, pady=20)
     autoupdate.select()
-
-    updatebutton = customtkinter.CTkButton(page, text="Update", command=Frontend.updatedownloader)
+    updatebutton = customtkinter.CTkButton(page, text="Update", command=Frontend.updatedownloader, fg_color=vars.colours["ButtonNormal"])
     updatebutton.pack(anchor="nw", padx=20, pady=20)
-
+    changeLocation = customtkinter.CTkButton(page,
+        text="Download Location", command =
+        Frontend.changeDownloadLocation, fg_color=vars.colours["ButtonNormal"])
+    changeLocation.pack(anchor="nw",padx = 20, pady=20)
     ###
     return page
+
+
 
 def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
@@ -76,7 +78,7 @@ def GetBrowserPage(frontend, searchResults) -> customtkinter.CTkFrame:
 
 def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtkinter.CTkFrame:
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-    
+
     customtkinter.CTkLabel(page, text=videoDetails["title"], fg_color="#321321").pack(anchor="nw", padx=10, pady=10)
 
     Thumbnail(videoDetails["thumbnails"][-1]["url"])
@@ -104,7 +106,7 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
         updateQualityArgs()
     qualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=qualityOption_var, values=qualityOptions, command=qualityChanged)
     qualityOptionsBar.set('highest')
-    qualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+    qualityOptionsBar.pack(anchor="nw", padx=10, pady=10)
 
     # Process args for YT-DLP
     def updateQualityArgs():
@@ -122,7 +124,7 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
             #TODO get mp3 with ffmpeg
             if qualityOption_var.get() == "highest":  qualityArgs = ["-f", "139", "--"]
             else: qualityArgs = ["-f", "139"]
-        
+
         return qualityArgs
 
     image = Frontend.GetImage("Download.png")
