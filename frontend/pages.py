@@ -128,7 +128,7 @@ def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtk
             else: qualityArgs = ["-f", "139"]
         elif downloadOption_var.get() == "mp3":
             #TODO get mp3 with ffmpeg
-            if qualityOption_var.get() == "highest":  qualityArgs = ["-f", "139", "--"]
+            if qualityOption_var.get() == "highest":  qualityArgs = ["-f", "139"]
             else: qualityArgs = ["-f", "139"]
 
         return qualityArgs
