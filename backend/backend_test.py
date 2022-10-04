@@ -22,6 +22,13 @@ def lewis_test():
 
 def johnny_test():
     print("Doing Johnny's Test...")
+    url = "https://www.youtube.com/watch?v=qIQ3xNqkVC4"
+
+    try: 
+        main_download.Downloader.downloadAudio(None, url)
+        print("Successfully pass Johnny test")
+    except:
+        print("Failed to pass Johnny test")
 
 if __name__ == "__main__":
     ryan_test()

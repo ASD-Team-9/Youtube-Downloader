@@ -49,10 +49,11 @@ class Downloader:
         self.queue.append(YouTubeItem(video_name, args))
         ActionThread("downloading thread", begin_downloading)
 
-    def downloadAudio():
+    def downloadAudio(self, url):
         # ffmpeg -i input.m4a -vn -ar 44100 -ac 2 -b:a 192k output.mp3
         # ffmpeg -i audio.wav -acodec libmp3lame audio.mp3
         print("Starting downloading audio")
+        print(url)
 
 class ActionThread:
     def __init__(self, thread_name, actionDelegate) -> None:

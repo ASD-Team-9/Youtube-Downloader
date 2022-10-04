@@ -1,6 +1,7 @@
 import backend.global_variables as vars
 import backend.main_download
 import frontend.pages as Pages
+import backend.search as searcher
 
 # UI
 import customtkinter
@@ -126,7 +127,7 @@ class FrontEnd(customtkinter.CTk):
     def AutoSearch(self, event): #The event parameter is needed.
         if vars.threads["searching thread"] == None:
             clipboard = self.clipboard_get()
-            if clipboard != self.entry.get() and vars.regex.fullmatch(clipboard):
+            if clipboard != self.entry.get() and searcher.isVideoURL(clipboard):
                 self.ClearEntry()
                 self.entry.insert(0, clipboard)
                 self.SearchEntry()
@@ -148,9 +149,11 @@ class FrontEnd(customtkinter.CTk):
     def thread_search(self, userInput):
         nextPage = None
         try:
-            if vars.regex.fullmatch(userInput):
+            if searcher.isVideoURL(userInput):
                 nextPage = "Video Details Page"
-                self.pages[nextPage] = Pages.GetVideoDetailsPage(False, searchURL(userInput))
+                self.pages[nextPage] = Pages.GetVideoDetailsPage(self, False, searchURL(userInput))
+            elif searcher.isPlayistURL(userInput):
+                print("Detect playist URL")
             else:
                 raise
         except:
