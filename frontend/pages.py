@@ -72,8 +72,11 @@ def GetAccountPage(frontend) -> customtkinter.CTkFrame:
     return page
 
 def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
-    def CreateAccount():
-        print("Hi")
+    def createAccount():
+        newUser = newUsername.get()
+        newPass = newPassword.get()
+        
+        messagebox.showinfo("Create New Account","Account Created!")
 
     page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
 
@@ -82,11 +85,17 @@ def GetNewAccountPage(frontend) -> customtkinter.CTkFrame:
 
     newUsername = customtkinter.CTkEntry(page, placeholder_text="New Username")
     newUsername.pack(side="top",anchor="nw", padx=10)
-    newUsername.bind("<Return>", CreateAccount)
+    newUsername.bind("<Return>", createAccount)
 
     newPassword = customtkinter.CTkEntry(page, placeholder_text="New Password")
     newPassword.pack(side="top",anchor="nw", padx=10,pady=10)
-    newPassword.bind("<Return>", CreateAccount)
+    newPassword.bind("<Return>", createAccount)
+
+    createButton = customtkinter.CTkButton(
+        page, text="Create Account", command=createAccount,
+        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
+    )
+    createButton.pack(side="top",anchor="nw", padx=10)
 
     return page
 
