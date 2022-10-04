@@ -25,5 +25,5 @@ steps:
     pip install customtkinter
   displayName: 'Install dependencies'
 
-- script: python backend\backend_test.py
-  displayName: 'Running backend test'
+- script: python azure_test.py
+  displayName: 'Running azure test'

@@ -1,0 +1,3 @@
+[MESSAGES CONTROL]
+#For VSCode pylint
+disable=E0401, E0611, W0703
