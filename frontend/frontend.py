@@ -151,7 +151,7 @@ class FrontEnd(customtkinter.CTk):
         try:
             if searcher.isVideoURL(userInput):
                 nextPage = "Video Details Page"
-                self.pages[nextPage] = Pages.GetVideoDetailsPage(self, False, searchURL(userInput))
+                self.pages[nextPage] = Pages.GetVideoDetailsPage(False, searchURL(userInput))
             elif searcher.isPlayistURL(userInput):
                 print("Detect playist URL")
             else:
