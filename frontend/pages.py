@@ -1,123 +1,216 @@
-import backend.global_variables as vars
-import customtkinter
-
-from PIL import Image, ImageTk
+"Pages for the main frontend class."
+from tkinter import messagebox
 from urllib.request import urlopen
 from io import BytesIO
 
+from PIL import Image, ImageTk
+import customtkinter
+
+import backend.constant_variables as CONST
 import frontend.frontend as Frontend
 
-def GetSettingsPage(frontend) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+def _get_page_template() -> customtkinter.CTkFrame:
+    "Returns an empty template of the page."
+    return customtkinter.CTkFrame(
+        CONST.FRONTEND.right_frame, corner_radius=0, fg_color=CONST.get_colour("Normal")
+    )
 
-    ###Fill stuff in over here!
-    title = customtkinter.CTkLabel(page, text="Settings Page", fg_color=vars.colours["Text"])
-    title.pack(anchor="nw", padx=10, pady=10)
-    ###
+def settings_page() -> customtkinter.CTkFrame:
+    "The settings page for the frontend."
+    page = _get_page_template()
+    autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
+    autoupdate.pack(anchor="nw", padx=10, pady=20)
+    autoupdate.select() #TODO: Make this dynamic with login
+
+    updatebutton = customtkinter.CTkButton(
+        page, text="Update", command=Frontend.update_downloader,
+        fg_color=CONST.get_colour("ButtonNormal")
+    )
+    updatebutton.pack(anchor="nw", padx=20, pady=20)
+
+    change_location = customtkinter.CTkButton(
+        page, text="Change Download Location",
+        command = Frontend.change_download_location, fg_color=CONST.get_colour("ButtonNormal")
+    )
+    change_location.pack(anchor="nw", padx=20, pady=20)
+
+    colour_choice_label = customtkinter.CTkLabel(page, text="Choose Colour Scheme:")
+    colour_choice_label.pack(anchor="nw", padx=20, pady=20)
+
+    colour_choice = customtkinter.CTkOptionMenu(
+        page, values=["Normal", "Green"]
+    )
+    colour_choice.pack(anchor="nw", padx=20, pady=10)
+    colour_choice.set("Normal")
     return page
 
-def GetAccountPage(frontend) -> customtkinter.CTkFrame:
-    def login():
-        print("Hi this is working")
+def account_page() -> customtkinter.CTkFrame:
+    "The account page for the frontend."
+    def login() -> None:
+        with open("resources/logins.txt", "r", encoding="utf-8") as file: #TODO: Make this dynamic
+            correct_username = file.readline().strip()
+            correct_password = file.readline().strip()
+        if correct_username == username.get() and correct_password == password.get():
+            #TODO: Remove this and just log in, hook this up to a new page.
+            messagebox.showinfo("Login","Login is successful")
+            username.destroy()
+            password.destroy()
+            login_button.destroy()
+            create_account_button.destroy()
+            new_title = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
+            new_title.pack(anchor="nw", padx=10, pady=10)
+        else:
+            messagebox.showinfo("Login","Login unsuccessful try again")
 
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-
-    ###Fill stuff in over here!
-    title = customtkinter.CTkLabel(page, text="Account Page", fg_color="#321321")
-    title.pack(anchor="nw", padx=10, pady=10)
+    page = _get_page_template()
 
     username = customtkinter.CTkEntry(page, placeholder_text="Username")
-    username.pack(side="left")
+    username.pack(side="top",anchor="nw", padx=10)
     username.bind("<Return>", login)
 
-    password = customtkinter.CTkEntry(page, placeholder_text="Password")
-    password.pack(side="left")
+    password = customtkinter.CTkEntry(page, placeholder_text="Password", show="*")
+    password.pack(side="top",anchor="nw", padx=10,pady=10)
     password.bind("<Return>", login)
 
-    customtkinter.CTkButton(
+    login_button = customtkinter.CTkButton(
         page, text="Login", command=login,
-        fg_color=vars.colours["ButtonNormal"], hover_color=vars.colours["ButtonHover"]
-    ).pack(side="left")
-    ###
+        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+    )
+    login_button.pack(side="top",anchor="nw", padx=10)
+
+    create_account_button = customtkinter.CTkButton(
+        page, text="Create Account",
+        command=lambda: CONST.FRONTEND.ChangePage("New Account Page"),
+        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+    )
+    create_account_button.pack(side="top",anchor="nw", padx=10, pady=5)
+
     return page
 
-def GetBrowserPage(frontend, searchResults) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
+def new_account_page() -> customtkinter.CTkFrame:
+    "The new account page for the frontend."
+    def create_account():
+        with open("resources/logins.txt","a", encoding="utf-8") as file:
+            file.write(new_username.get() + "\n")
+            file.write(new_password.get() + "\n")
+        messagebox.showinfo("Create New Account","Account Created!")
 
-    for video in searchResults:
+    page = _get_page_template()
+
+    title = customtkinter.CTkLabel(page, text="Create a New Account", fg_color="#321321")
+    title.pack(anchor="nw", padx=10, pady=10)
+
+    new_username = customtkinter.CTkEntry(page, placeholder_text="New Username")
+    new_username.pack(side="top",anchor="nw", padx=10)
+    new_username.bind("<Return>", create_account)
+
+    new_password = customtkinter.CTkEntry(page, placeholder_text="New Password")
+    new_password.pack(side="top",anchor="nw", padx=10,pady=10)
+    new_password.bind("<Return>", create_account)
+
+    create_button = customtkinter.CTkButton(
+        page, text="Create Account", command=create_account,
+        fg_color=CONST.get_colour("ButtonNormal"),
+        hover_color=CONST.get_colour("ButtonHover")
+    )
+    create_button.pack(side="top",anchor="nw", padx=10)
+
+    return page
+
+def browser_page(search_results: dict) -> customtkinter.CTkFrame:
+    "The browser page for the front end."
+    page = _get_page_template()
+
+    for video in search_results:
         for key in ["title", "duration", "thumbnails", "link"]:
-            title = customtkinter.CTkLabel(page, text=f"{key}: {video[key]}", fg_color=vars.colours["Text"])
+            title = customtkinter.CTkLabel(
+                page, text=f"{key}: {video[key]}", fg_color=CONST.get_colour("Text")
+            )
             title.pack(anchor="nw", padx=10, pady=10)
     return page
 
-def GetVideoDetailsPage(frontend, cameFromBrowserPage, videoDetails) -> customtkinter.CTkFrame:
-    page = customtkinter.CTkFrame(frontend.rightFrame, corner_radius=0, fg_color=vars.colours["Normal"])
-    
-    customtkinter.CTkLabel(page, text=videoDetails["title"], fg_color="#321321").pack(anchor="nw", padx=10, pady=10)
+#TODO: came_from_browser_page implementation
+def video_details_page(came_from_browser_page: bool, video_details: dict) -> customtkinter.CTkFrame:
+    "The video details page for the front end."
+    def download() -> None:
+        CONST.FRONTEND.download(
+            video_details["title"], [CONST.YTDLP, video_details["link"]] + update_video_args()
+        )
 
-    Thumbnail(videoDetails["thumbnails"][-1]["url"])
-    thumbnail = customtkinter.CTkLabel(page, image=vars.thumbnails[0].thumbnail)
+    page = _get_page_template()
+
+    customtkinter.CTkLabel(
+        page, text=video_details["title"], fg_color="#321321"
+    ).pack(anchor="nw", padx=10, pady=10)
+
+    Thumbnail(video_details["thumbnails"][-1]["url"])
+    thumbnail = customtkinter.CTkLabel(page, image=CONST.THUMBNAILS[0].thumbnail)
     thumbnail.pack(anchor="nw", side="top")
 
-    progressArgs = ["-o", "%(title)s.%(ext)s", "--progress-template", "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"]
-    ## DOWNLOAD TYPE OPTIONS
-
     # Download Type Dropdown
-    downloadOptions = ['mp4', 'm4a', 'mp3']
-    downloadOption_var = customtkinter.StringVar()
-    def downloadOptionChanged(*args):
-        print("Download Option Change: " + downloadOption_var.get())
-        updateQualityArgs()
-    downloadOptionsBar = customtkinter.CTkOptionMenu(page, variable=downloadOption_var, values=downloadOptions, command=downloadOptionChanged)
-    downloadOptionsBar.set('mp4')
-    downloadOptionsBar.pack(anchor="nw", padx=10, pady=10)
+    download_option = customtkinter.StringVar()
+    download_options_menu = customtkinter.CTkOptionMenu(
+        page, variable=download_option,
+        values=['mp4', 'm4a', 'mp3'],
+    )
+    download_options_menu.set('mp4')
+    download_options_menu.pack(anchor="nw", padx=10, pady=10)
 
     # Quality Dropdown Options
-    qualityOptions = ['highest', 'medium', 'low', 'lowest']
-    qualityOption_var = customtkinter.StringVar()
-    def qualityChanged(*args):
-        print("Quality change: " + qualityOption_var.get())
-        updateQualityArgs()
-    qualityOptionsBar = customtkinter.CTkOptionMenu(page, variable=qualityOption_var, values=qualityOptions, command=qualityChanged)
-    qualityOptionsBar.set('highest')
-    qualityOptionsBar.pack(anchor="nw", padx=10, pady=10) 
+    quality_option = customtkinter.StringVar()
+    quality_options_menu = customtkinter.CTkOptionMenu(
+        page, variable=quality_option,
+        values=['highest', 'medium', 'low', 'lowest'],
+    )
+    quality_options_menu.set('highest')
+    quality_options_menu.pack(anchor="nw", padx=10, pady=10)
 
     # Process args for YT-DLP
-    def updateQualityArgs():
-        qualityArgs = []
-        if downloadOption_var.get() == "mp4":
-            # if qualityOption_var.get() == "highest": qualityArgs = ["-f", "bestvideo"]
-            if qualityOption_var.get() == "medium": qualityArgs = ["-f", "136"]
-            elif qualityOption_var.get() == "low" : qualityArgs = ["-f", "135"]
-            elif qualityOption_var.get() == "lowest" : qualityArgs = ["-f", "160"]
-            else: qualityArgs.append("bestvideo")
-        elif downloadOption_var.get() == "m4a":
-            if qualityOption_var.get() == "highest": qualityArgs = ["-f", "140"]
-            else: qualityArgs = ["-f", "139"]
-        elif downloadOption_var.get() == "mp3":
-            #TODO get mp3 with ffmpeg
-            if qualityOption_var.get() == "highest":  qualityArgs = ["-f", "139"]
-            else: qualityArgs = ["-f", "139"]
-        
-        return qualityArgs
+    def update_video_args() -> None:
+        defaualt_args = [
+            "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
+            "--progress-template",
+            "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
+        ]
 
-    image = Frontend.GetImage("Download.png")
+        args = ["-f"]
+        match download_option.get():
+            case "mp4":
+                match quality_option.get():
+                    case "highest":
+                        args.append("-bestvideo")
+                    case "medium":
+                        args.append("136")
+                    case "low":
+                        args.append("135")
+                    case "lowest":
+                        args.append("160")
+            case "m4a":
+                args.append("140" if quality_option.get() == "highest" else "139")
+            case "mp3":
+                #TODO get mp3 with ffmpeg
+                pass
+        return defaualt_args + args
+
+    image = Frontend.get_image("Download.png")
     customtkinter.CTkButton(
         page, text="Download", image=image, compound="top",
         width=image.width() + 10, height=image.height() + 10,
-        fg_color=vars.colours["ButtonHover"], hover_color=vars.colours["ButtonHover2"],
-        command=lambda: frontend.Download(videoDetails["title"], [videoDetails["link"]] + progressArgs + updateQualityArgs()) #TODO: Last argument is where you combine all preferences + path + etc.
+        fg_color=CONST.get_colour("ButtonHover"), hover_color=CONST.get_colour("ButtonHover2"),
+        command=download
     ).pack(side="top", anchor="s", fill=customtkinter.X)
 
     return page
 
 class Thumbnail:
+    """
+    Thumbnail class\n
+    Needed to prevent Python garbage collection from removing images loaded from net.
+    """
     def __init__(self, url) -> None:
         try:
-            u = urlopen(url)
-            raw_data = u.read()
-            u.close()
-            self.thumbnail = ImageTk.PhotoImage(Image.open(BytesIO(raw_data)))
-        except:
-            return
-        vars.thumbnails.append(self)
+            with urlopen(url) as raw_data:
+                self.thumbnail = ImageTk.PhotoImage(Image.open(BytesIO(raw_data.read())))
+            CONST.THUMBNAILS.append(self)
+        except Exception:
+            pass

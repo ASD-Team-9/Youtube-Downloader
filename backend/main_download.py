@@ -1,90 +1,68 @@
-try:
-    import backend.global_variables as vars
-except:
-    import global_variables as vars
-
-import customtkinter
+"This is the main downloading class"
 import subprocess
 import time
-import threading
+
+from frontend.download_item import DownloadItem
+from backend.action_thread import ActionThread
+import backend.constant_variables as CONST
 
 class Downloader:
-    def __init__(self, frontend) -> None:
-        self.frontend = frontend
-        self.queue = []
-        self.auto_update()
+    """
+    This is the main downloader class.
 
-    def auto_update(self):
+    Methods:
+        update_downloader()\n
+        download(video_name, args)\n
+        download_audio(url)\n
+    """
+    def __init__(self) -> None:
+        self.queue = []
+        self.update_downloader() #TODO: Read from preferences and choose to auto update or not.
+
+    def update_downloader(self) -> None:
+        "Updates the downloader. Simply calling this is enough."
         def check_updating():
-            vars.isUpdating = True
-            subprocess.run([vars.ytdlp, "-U"])
-            vars.isUpdating = False
+            subprocess.run([CONST.YTDLP, "-U"], check=True)
         ActionThread("auto update thread", check_updating)
 
-    """
-    Download a video by using threads
+    def download(self, video_name: str, args: list[str]) -> None:
+        """
+        Download a video by using threads
 
-    Parameters: 
+        Parameters: video_name, args
 
-    video_name: The video title
-    args: The arguements/options from yt-dlp
-    """
-    def download(self, video_name, args) -> None:
+        video_name: The video title
+        args: The arguements/options from yt-dlp
+        """
         def begin_downloading() -> None:
-            if (vars.isUpdating):
+            if CONST.THREADS["auto update thread"] is not None:
                 time.sleep(0)
 
-            while len(self.queue) > 0: #I'm under the assumption that we are using only one thread to download.
+            #I'm under the assumption that we are using only one thread to download.
+            while len(self.queue) > 0:
                 item = self.queue.pop(0)
-                try:
-                    with subprocess.Popen(item.args, stdout=subprocess.PIPE, bufsize=1, shell=False, universal_newlines=True) as p:
-                        for line in p.stdout:
-                            data = line.split()
-                            try:
-                                print(data)
-                                item.progress_bar.set(float(data[0].strip("%")) * 0.01)
-                            except:
-                                pass
-                    if p.returncode != 0:
-                        raise
-                except:
-                    print("An Error occured")
+                if CONST.AZURE_TEST:
+                    subprocess.run(item.args, check=True)
+                    continue
 
-        self.queue.append(YouTubeItem(self.frontend, video_name, args))
+                with subprocess.Popen(
+                    item.args, stdout=subprocess.PIPE,
+                    bufsize=1, shell=False, universal_newlines=True
+                ) as process:
+                    for line in process.stdout:
+                        data = line.split()
+                        try:
+                            item.progress_bar.set(float(data[0].strip("%")) * 0.01)
+                        except Exception:
+                            pass
+                if process.returncode != 0:
+                    print("ERROR HERE") #TODO: Update failure on queued item
+        self.queue.append(DownloadItem(video_name, args))
         ActionThread("downloading thread", begin_downloading)
 
-    def downloadAudio(self, url):
+    def download_audio(self, url):
+        "Auto converts a video into audio??"
         # ffmpeg -i input.m4a -vn -ar 44100 -ac 2 -b:a 192k output.mp3
         # ffmpeg -i audio.wav -acodec libmp3lame audio.mp3
         print("Starting downloading audio")
         print(url)
-
-class ActionThread:
-    def __init__(self, thread_name, actionDelegate) -> None:
-        def thread_action():
-            self.actionDelegate()
-            vars.threads[self.name] = None
-            
-        if (vars.threads[thread_name] == None):
-            self.name = thread_name
-            self.actionDelegate = actionDelegate
-            vars.threads[thread_name] = threading.Thread(target=thread_action)
-            vars.threads[thread_name].start()
-
-class YouTubeItem():
-    def __init__(self, frontend, video_name, args) -> None:
-        padding = 10
-        width = frontend.canvas.winfo_width() - 27
-        self.frame = customtkinter.CTkFrame(frontend.scrollable_frame, corner_radius=10, fg_color=vars.colours["Normal"])
-        self.frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
-        customtkinter.CTkLabel(self.frame, text=video_name, width=width).pack(anchor="n", pady=padding)
-        self.args = [vars.ytdlp] + args
-        self.progress_bar = customtkinter.CTkProgressBar(self.frame, width=width)
-        self.progress_bar.set(0)
-        self.progress_bar.pack(side="top")
-
-    def finished(self) -> None:
-        pass #TODO Add a remove icon button that calls self.remove()
-
-    def remove(self) -> None:
-        self.frame.forget()
