@@ -33,7 +33,7 @@ youtube_downloader
 python3 youtube_downloader.pyw
 ```
 
-## Member 
+## Members
 Johnny
 - Download video based on quality
 - Converter System
