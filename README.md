@@ -2,10 +2,11 @@
 
 ## Folder Structure
 ```python
-youtube_downloader
+Youtube-Downloader
 |   youtube_downloader.pyw  
 |   azure_test.py
-|   
+|   azure-pipelines.yaml
+|
 |___backend
 |   |   main_download.py    #Download System
 |   |   search.py           #Search System
@@ -56,9 +57,11 @@ Ryan
 
 ## Code Contribution
 ```python
-youtube_downloader
+Youtube-Downloader
 |   youtube_downloader.pyw  #Ryan
-|   
+|   azure_test.py           #Everyone
+|   azure-pipelines.yaml
+|
 |___backend
 |   |   main_download.py    #Ryan, Johnny
 |   |   search.py           #Ryan, Johnny
