@@ -80,7 +80,7 @@ def account_page() -> customtkinter.CTkFrame:
 
     create_account_button = customtkinter.CTkButton(
         page, text="Create Account",
-        command=lambda: CONST.FRONTEND.ChangePage("New Account Page"),
+        command=lambda: CONST.FRONTEND.change_page("New Account Page"),
         fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
     )
     create_account_button.pack(side="top",anchor="nw", padx=10, pady=5)
