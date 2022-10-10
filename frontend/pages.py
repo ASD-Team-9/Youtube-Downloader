@@ -18,23 +18,24 @@ def _get_page_template() -> customtkinter.CTkFrame:
 def settings_page() -> customtkinter.CTkFrame:
     "The settings page for the frontend."
     page = _get_page_template()
-    autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
+    autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update", text_color=CONST.get_colour("Text"))
     autoupdate.pack(anchor="nw", padx=10, pady=20)
     autoupdate.select() #TODO: Make this dynamic with login
 
     updatebutton = customtkinter.CTkButton(
         page, text="Update", command=Frontend.update_downloader,
-        fg_color=CONST.get_colour("ButtonNormal")
+        fg_color=CONST.get_colour("ButtonNormal"),
+        text_color=CONST.get_colour("Text")
     )
     updatebutton.pack(anchor="nw", padx=20, pady=20)
 
     change_location = customtkinter.CTkButton(
         page, text="Change Download Location",
-        command = Frontend.change_download_location, fg_color=CONST.get_colour("ButtonNormal")
+        command = Frontend.change_download_location, fg_color=CONST.get_colour("ButtonNormal"), text_color=CONST.get_colour("Text")
     )
     change_location.pack(anchor="nw", padx=20, pady=20)
 
-    colour_choice_label = customtkinter.CTkLabel(page, text="Choose Colour Scheme:")
+    colour_choice_label = customtkinter.CTkLabel(page, text="Choose Colour Scheme:", text_color=CONST.get_colour("Text"))
     colour_choice_label.pack(anchor="nw", padx=20, pady=20)
 
     colour_choice = customtkinter.CTkOptionMenu(
@@ -73,7 +74,7 @@ def account_page() -> customtkinter.CTkFrame:
     password.bind("<Return>", login)
 
     login_button = customtkinter.CTkButton(
-        page, text="Login", command=login,
+        page, text="Login", command=login, text_color=CONST.get_colour("Text"),
         fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
     )
     login_button.pack(side="top",anchor="nw", padx=10)
@@ -81,7 +82,7 @@ def account_page() -> customtkinter.CTkFrame:
     create_account_button = customtkinter.CTkButton(
         page, text="Create Account",
         command=lambda: CONST.FRONTEND.ChangePage("New Account Page"),
-        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover"), text_color=CONST.get_colour("Text")
     )
     create_account_button.pack(side="top",anchor="nw", padx=10, pady=5)
 
@@ -111,7 +112,8 @@ def new_account_page() -> customtkinter.CTkFrame:
     create_button = customtkinter.CTkButton(
         page, text="Create Account", command=create_account,
         fg_color=CONST.get_colour("ButtonNormal"),
-        hover_color=CONST.get_colour("ButtonHover")
+        hover_color=CONST.get_colour("ButtonHover"),
+        text_color=CONST.get_colour("Text")
     )
     create_button.pack(side="top",anchor="nw", padx=10)
 
@@ -140,11 +142,11 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     page = _get_page_template()
 
     customtkinter.CTkLabel(
-        page, text=video_details["title"], fg_color="#321321"
+        page, text=video_details["title"], text_color=CONST.get_colour("Text"), text_font=('Helvetica bold',30)
     ).pack(anchor="nw", padx=10, pady=10)
 
     Thumbnail(video_details["thumbnails"][-1]["url"])
-    thumbnail = customtkinter.CTkLabel(page, image=CONST.THUMBNAILS[0].thumbnail)
+    thumbnail = customtkinter.CTkLabel(page, image=CONST.THUMBNAILS[0].thumbnail, text_color=CONST.get_colour("Text"))
     thumbnail.pack(anchor="nw", side="top")
 
     # Download Type Dropdown
@@ -152,6 +154,7 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     download_options_menu = customtkinter.CTkOptionMenu(
         page, variable=download_option,
         values=['mp4', 'm4a', 'mp3'],
+        text_color=CONST.get_colour("Text")
     )
     download_options_menu.set('mp4')
     download_options_menu.pack(anchor="nw", padx=10, pady=10)
@@ -161,6 +164,7 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     quality_options_menu = customtkinter.CTkOptionMenu(
         page, variable=quality_option,
         values=['highest', 'medium', 'low', 'lowest'],
+        text_color=CONST.get_colour("Text")
     )
     quality_options_menu.set('highest')
     quality_options_menu.pack(anchor="nw", padx=10, pady=10)
@@ -196,7 +200,8 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     customtkinter.CTkButton(
         page, text="Download", image=image, compound="top",
         width=image.width() + 10, height=image.height() + 10,
-        fg_color=CONST.get_colour("ButtonHover"), hover_color=CONST.get_colour("ButtonHover2"),
+        fg_color=CONST.get_colour("ButtonHover"), hover_color=CONST.get_colour("ButtonHover2"), 
+        text_color=CONST.get_colour("Text"),
         command=download
     ).pack(side="top", anchor="s", fill=customtkinter.X)
 
