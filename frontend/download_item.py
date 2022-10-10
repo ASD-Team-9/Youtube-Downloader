@@ -1,6 +1,7 @@
 "A class to help update the frontend queue."
 import customtkinter
 import backend.constant_variables as CONST
+import frontend.color as COLOR
 
 class DownloadItem():
     "A simple class to update the frontend queue."
@@ -9,7 +10,7 @@ class DownloadItem():
         width = CONST.FRONTEND.canvas.winfo_width() - 27
 
         self.frame = customtkinter.CTkFrame(
-            CONST.FRONTEND.scrollable_frame, corner_radius=10, fg_color=CONST.get_colour("Normal")
+            CONST.FRONTEND.scrollable_frame, corner_radius=10, fg_color=COLOR.get_colour("Normal")
         )
         self.frame.pack(ipadx=padding, ipady=padding, pady=(0, padding))
 
