@@ -97,12 +97,6 @@ def account_page() -> customtkinter.CTkFrame:
 
 def new_account_page() -> customtkinter.CTkFrame:
     "The new account page for the frontend."
-    def create_account():
-        with open("resources/logins.txt","a", encoding="utf-8") as file:
-            file.write(new_username.get() + "\n")
-            file.write(new_password.get() + "\n")
-        messagebox.showinfo("Create New Account","Account Created!")
-
     def register():
         username = new_username.get()
         password = new_password.get()
