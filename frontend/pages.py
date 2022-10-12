@@ -47,22 +47,30 @@ def settings_page() -> customtkinter.CTkFrame:
 def account_page() -> customtkinter.CTkFrame:
     "The account page for the frontend."
     def login() -> None:
-        with open("resources/logins.txt", "r", encoding="utf-8") as file: #TODO: Make this dynamic
-            correct_username = file.readline().strip()
-            correct_password = file.readline().strip()
-        if correct_username == username.get() and correct_password == password.get():
-            #TODO: Remove this and just log in, hook this up to a new page.
+        with open("resources/logins.txt", "r", encoding="utf-8") as file:
+            correct_username = username.get()
+            correct_password = password.get()
+        for line in open("resources/logins.txt", "r", encoding="utf-8").readlines(): # Read the lines
+            login_info = line.split("|") # Split on the space, and store the results in a list of two strings
+        if correct_username == login_info[0] and correct_password == login_info[1]:
             messagebox.showinfo("Login","Login is successful")
+            #TODO: Remove this and just log in, hook this up to a new page.
             username.destroy()
             password.destroy()
             login_button.destroy()
+            login_page.destroy()
             create_account_button.destroy()
-            new_title = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
-            new_title.pack(anchor="nw", padx=10, pady=10)
+            playlist = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
+            playlist.pack(anchor="nw", padx=10, pady=10)
+            return True
         else:
             messagebox.showinfo("Login","Login unsuccessful try again")
+        return False
 
     page = _get_page_template()
+
+    login_page = customtkinter.CTkLabel(page, text="Login Page", fg_color="#321321")
+    login_page.pack(anchor="nw", padx=10, pady=10)
 
     username = customtkinter.CTkEntry(page, placeholder_text="Username")
     username.pack(side="top",anchor="nw", padx=10)
@@ -95,6 +103,17 @@ def new_account_page() -> customtkinter.CTkFrame:
             file.write(new_password.get() + "\n")
         messagebox.showinfo("Create New Account","Account Created!")
 
+    def register():
+        username = new_username.get()
+        password = new_password.get()
+        file = open("resources/logins.txt","a", encoding="utf-8")
+        file.write(username)
+        file.write("|")
+        file.write(password)
+        file.write("\n")
+        file.close()
+        messagebox.showinfo("Create New Account","Account Created!")
+
     page = _get_page_template()
 
     title = customtkinter.CTkLabel(page, text="Create a New Account", fg_color="#321321")
@@ -102,14 +121,14 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     new_username = customtkinter.CTkEntry(page, placeholder_text="New Username")
     new_username.pack(side="top",anchor="nw", padx=10)
-    new_username.bind("<Return>", create_account)
+    new_username.bind("<Return>", register)
 
     new_password = customtkinter.CTkEntry(page, placeholder_text="New Password")
     new_password.pack(side="top",anchor="nw", padx=10,pady=10)
-    new_password.bind("<Return>", create_account)
+    new_password.bind("<Return>", register)
 
     create_button = customtkinter.CTkButton(
-        page, text="Create Account", command=create_account,
+        page, text="Create Account", command=register,
         fg_color=CONST.get_colour("ButtonNormal"),
         hover_color=CONST.get_colour("ButtonHover")
     )
