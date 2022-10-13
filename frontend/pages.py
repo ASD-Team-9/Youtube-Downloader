@@ -44,10 +44,18 @@ def settings_page() -> customtkinter.CTkFrame:
     colour_choice.set("Normal")
     return page
 
+def history_page() -> customtkinter.CTkFrame:
+    page = _get_page_template()
+    
+    title = customtkinter.CTkLabel(page, text="History Page", fg_color="#321321")
+    title.pack(anchor="nw", padx=10, pady=10)
+
+    return page
+
 def account_page() -> customtkinter.CTkFrame:
     "The account page for the frontend."
     def login() -> None:
-        with open("resources/logins.txt", "r", encoding="utf-8") as file:
+        with open("resources/logins.txt", "r", encoding="utf-8"):
             correct_username = username.get()
             correct_password = password.get()
         for line in open("resources/logins.txt", "r", encoding="utf-8").readlines(): # Read the lines
@@ -55,13 +63,7 @@ def account_page() -> customtkinter.CTkFrame:
         if correct_username == login_info[0] and correct_password == login_info[1]:
             messagebox.showinfo("Login","Login is successful")
             #TODO: Remove this and just log in, hook this up to a new page.
-            username.destroy()
-            password.destroy()
-            login_button.destroy()
-            login_page.destroy()
-            create_account_button.destroy()
-            playlist = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
-            playlist.pack(anchor="nw", padx=10, pady=10)
+            CONST.FRONTEND.change_page("History Page")
             return True
         else:
             messagebox.showinfo("Login","Login unsuccessful try again")

@@ -163,9 +163,11 @@ class FrontEnd(customtkinter.CTk):
             "Settings Page" : Pages.settings_page(),
             "Account Page" : Pages.account_page(),
             "New Account Page" : Pages.new_account_page(),
+            "History Page" : Pages.history_page(),
             "Unknown Page" : customtkinter.CTkFrame(
                 corner_radius=0, fg_color=CONST.get_colour("Normal")
             )
+            
         }
         self.current_page = None
 
