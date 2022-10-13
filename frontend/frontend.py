@@ -140,7 +140,8 @@ class FrontEnd(customtkinter.CTk):
                 customtkinter.CTkButton(
                     left_bottom_frame, image=logo,
                     width=logo.width() + 10, height=logo.height() + 10,
-                    fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover"),
+                    fg_color=CONST.get_colour("ButtonNormal"),
+                    hover_color=CONST.get_colour("ButtonHover"),
                     text="", command=command
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
             image_buttons("SettingsIcon.png", 3, lambda: self.change_page("Settings Page"))
