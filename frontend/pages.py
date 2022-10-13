@@ -45,8 +45,9 @@ def settings_page() -> customtkinter.CTkFrame:
     return page
 
 def history_page() -> customtkinter.CTkFrame:
+    "The history page"
     page = _get_page_template()
-    
+
     title = customtkinter.CTkLabel(page, text="History Page", fg_color="#321321")
     title.pack(anchor="nw", padx=10, pady=10)
 
@@ -58,16 +59,16 @@ def account_page() -> customtkinter.CTkFrame:
         with open("resources/logins.txt", "r", encoding="utf-8"):
             correct_username = username.get()
             correct_password = password.get()
-        for line in open("resources/logins.txt", "r", encoding="utf-8").readlines(): # Read the lines
-            login_info = line.split("|") # Split on the space, and store the results in a list of two strings
+
+        for line in open("resources/logins.txt", "r", encoding="utf-8").readlines():
+            login_info = line.split("|")
+
         if correct_username == login_info[0] and correct_password == login_info[1]:
             messagebox.showinfo("Login","Login is successful")
             #TODO: Remove this and just log in, hook this up to a new page.
             CONST.FRONTEND.change_page("History Page")
-            return True
         else:
             messagebox.showinfo("Login","Login unsuccessful try again")
-        return False
 
     page = _get_page_template()
 
@@ -103,10 +104,7 @@ def new_account_page() -> customtkinter.CTkFrame:
         username = new_username.get()
         password = new_password.get()
         file = open("resources/logins.txt","a", encoding="utf-8")
-        file.write(username)
-        file.write("|")
-        file.write(password)
-        file.write("\n")
+        file.write(f"{username}|{password}\n")
         file.close()
         messagebox.showinfo("Create New Account","Account Created!")
 
