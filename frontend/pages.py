@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import customtkinter
 
 import backend.constant_variables as CONST
+import backend.format as Format
 import frontend.frontend as Frontend
 import frontend.color as COLOR
 
@@ -135,10 +136,6 @@ def browser_page(search_results: dict) -> customtkinter.CTkFrame:
 #TODO: came_from_browser_page implementation
 def video_details_page(came_from_browser_page: bool, video_details: dict) -> customtkinter.CTkFrame:
     "The video details page for the front end."
-    def download() -> None:
-        CONST.FRONTEND.download(
-            video_details["title"], [CONST.YTDLP, video_details["link"]] + update_video_args()
-        )
 
     page = _get_page_template()
 
@@ -170,32 +167,10 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     quality_options_menu.set('highest')
     quality_options_menu.pack(anchor="nw", padx=10, pady=10)
 
-    # Process args for YT-DLP
-    def update_video_args() -> None:
-        defaualt_args = [
-            "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
-            "--progress-template",
-            "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
-        ]
-
-        args = ["-f"]
-        match download_option.get():
-            case "mp4":
-                match quality_option.get():
-                    case "highest":
-                        args.append("-bestvideo")
-                    case "medium":
-                        args.append("136")
-                    case "low":
-                        args.append("135")
-                    case "lowest":
-                        args.append("160")
-            case "m4a":
-                args.append("140" if quality_option.get() == "highest" else "139")
-            case "mp3":
-                #TODO get mp3 with ffmpeg
-                pass
-        return defaualt_args + args
+    def download() -> None:
+        CONST.FRONTEND.download(
+            video_details ,Format.update_video_args(format = download_option.get(), quality=quality_option.get())
+        )
 
     image = Frontend.get_image("Download.png")
     customtkinter.CTkButton(

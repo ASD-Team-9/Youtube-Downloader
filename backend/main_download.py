@@ -15,9 +15,20 @@ class Downloader:
         download(video_name, args)\n
         download_audio(url)\n
     """
+
+
+
     def __init__(self) -> None:
         self.queue = []
         self.update_downloader() #TODO: Read from preferences and choose to auto update or not.
+
+    def get_default_args(self) -> list[str]:
+        "Getting the default arguements"
+        return [
+        "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
+        "--progress-template",
+        "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
+        ]
 
     def update_downloader(self) -> None:
         "Updates the downloader. Simply calling this is enough."
@@ -25,7 +36,7 @@ class Downloader:
             subprocess.run([CONST.YTDLP, "-U"], check=True)
         ActionThread("auto update thread", check_updating)
 
-    def download(self, video_name: str, args: list[str]) -> None:
+    def download(self, video_details: dict, args: list[str]) -> None:
         """
         Download a video by using threads
 
@@ -57,7 +68,7 @@ class Downloader:
                             pass
                 if process.returncode != 0:
                     print("ERROR HERE") #TODO: Update failure on queued item
-        self.queue.append(DownloadItem(video_name, args))
+        self.queue.append(DownloadItem(video_details["title"], [CONST.YTDLP, video_details["link"]] + self.get_default_args() + args))
         ActionThread("downloading thread", begin_downloading)
 
     def download_audio(self, url):
