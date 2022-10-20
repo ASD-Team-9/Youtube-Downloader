@@ -2,13 +2,17 @@ def update_video_args(format: str, quality: str, other_args=[]) -> list[str]:
     "Update video arguements for ytdlp"
     args = []
     match format:
+        case 'best video':
+            args = ["-f", "bv+ba/b"]
+        case 'best audio':
+            args = ["-x"]
         case "webm":
             args = ["-f"]
             match quality:
                 case "highest":
                     args += ["webm"]
                 case "lowest":
-                    args += ["wv*[ext=mp4]+wa/w"]
+                    args += ["wv*[ext=webm]+wa/w"]
         case "mp4":
             args = ["-f"]
             match quality:

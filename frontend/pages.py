@@ -151,11 +151,21 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     download_option = customtkinter.StringVar()
     download_options_menu = customtkinter.CTkOptionMenu(
         page, variable=download_option,
-        values=['mp4', 'm4a', 'mp3'],
+        values=['best video', 'best audio', 'mp4', 'webm', 'm4a', 'mp3'],
         text_color=COLOR.get_colour("Text")
     )
     download_options_menu.set('mp4')
     download_options_menu.pack(anchor="nw", padx=10, pady=10)
+
+    def on_download_option_changed(*args):
+        # Best video/audio doesn't need quality options
+        # Hide it when best __ is seledted
+        match download_option.get():
+            case 'best video' | 'best audio':
+                quality_options_menu.pack_forget()
+            case _:
+                quality_options_menu.pack(anchor="nw", padx=10, pady=10)
+    download_option.trace_variable('w', on_download_option_changed)
 
     # Quality Dropdown Options
     quality_option = customtkinter.StringVar()
@@ -179,7 +189,7 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
         fg_color=COLOR.get_colour("ButtonHover"), hover_color=COLOR.get_colour("ButtonHover2"), 
         text_color=COLOR.get_colour("Text"),
         command=download
-    ).pack(side="top", anchor="s", fill=customtkinter.X)
+    ).pack(side="bottom", anchor="s", fill=customtkinter.X)
 
     return page
 
