@@ -168,8 +168,8 @@ def video_details_page(came_from_browser_page: bool, video_details: dict) -> cus
     quality_options_menu.pack(anchor="nw", padx=10, pady=10)
 
     def download() -> None:
-        CONST.FRONTEND.download(
-            video_details ,Format.update_video_args(format = download_option.get(), quality=quality_option.get())
+        CONST.DOWNLOADER.download(
+            video_details,format_type = download_option.get(), quality_type = quality_option.get()
         )
 
     image = Frontend.get_image("Download.png")

@@ -1,4 +1,4 @@
-def update_video_args(format: str, quality: str, other_args=[]) -> None:
+def update_video_args(format: str, quality: str, other_args=[]) -> list[str]:
       args = ["-f"]
       match format:
           case "mp4":
