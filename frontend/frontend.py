@@ -4,6 +4,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 import customtkinter
 import youtubesearchpython as YouTube
+import frontend.color as COLOR
 
 #Other modules
 import backend.constant_variables as CONST
@@ -31,7 +32,7 @@ class FrontEnd(customtkinter.CTk):
         self.height = 720
         self.geometry(f"{self.width}x{self.height}")
         self.title("YouTube Downloader")
-        self.configure(bg=CONST.get_colour("Normal"))
+        self.configure(bg=COLOR.get_colour("Normal"))
         self.resizable(False, False)
 
     def _set_left_frame(self) -> None:
@@ -41,7 +42,7 @@ class FrontEnd(customtkinter.CTk):
         left_frame_width = third - padding * 2
 
         left_frame = customtkinter.CTkFrame(
-            self, fg_color=CONST.get_colour("Dark"), corner_radius=0
+            self, fg_color=COLOR.get_colour("Dark"), corner_radius=0
         )
         left_frame.pack(
             side=tkinter.LEFT, anchor="nw", fill=tkinter.Y,
@@ -63,7 +64,7 @@ class FrontEnd(customtkinter.CTk):
                     ActionThread("searching thread", lambda: self.thread_search(search))
 
             left_top_frame = customtkinter.CTkFrame(
-                left_frame, fg_color=CONST.get_colour("Normal2"), height=self.height * 0.1
+                left_frame, fg_color=COLOR.get_colour("Normal2"), height=self.height * 0.1
             )
             left_top_frame.pack(
                 side=tkinter.TOP, anchor="nw", fill=tkinter.X,
@@ -83,22 +84,22 @@ class FrontEnd(customtkinter.CTk):
             height = ((clear_icon.height() + search_icon.height()) * 0.5) + padding
             customtkinter.CTkButton(
                 left_top_frame, image=clear_icon, width=width, height=height,
-                fg_color=CONST.get_colour("ButtonNormal"),
-                hover_color=CONST.get_colour("ButtonHover"),
+                fg_color=COLOR.get_colour("ButtonNormal"),
+                hover_color=COLOR.get_colour("ButtonHover"),
                 text="", command=self.clear_entry
             ).pack(side="left", fill=tkinter.X, expand=True, padx=(padding, 0))
 
             customtkinter.CTkButton(
                 left_top_frame, image=search_icon, width=width, height=height,
-                fg_color=CONST.get_colour("ButtonNormal"),
-                hover_color=CONST.get_colour("ButtonHover"),
+                fg_color=COLOR.get_colour("ButtonNormal"),
+                hover_color=COLOR.get_colour("ButtonHover"),
                 text="", command=lambda: search_entry(self)
             ).pack(side="left", fill=tkinter.X, expand=True, padx=padding)
         set_left_top_frame(self)
 
         def set_left_middle_frame(self: FrontEnd) -> None:
             left_middle_frame = customtkinter.CTkFrame(
-                left_frame, fg_color=CONST.get_colour("Normal2")
+                left_frame, fg_color=COLOR.get_colour("Normal2")
             )
             left_middle_frame.pack(side="top", fill=tkinter.BOTH, expand=True, padx=padding)
 
@@ -109,19 +110,19 @@ class FrontEnd(customtkinter.CTk):
 
             scrollbar = customtkinter.CTkScrollbar(
                 left_middle_frame,
-                fg_color=CONST.get_colour("Normal2"),
+                fg_color=COLOR.get_colour("Normal2"),
                 command=self.canvas.yview
             )
             scrollbar.pack(side="right", fill="y", padx=(0, 3))
 
-            self.scrollable_frame = tkinter.Frame(self.canvas, bg=CONST.get_colour("Normal2"))
+            self.scrollable_frame = tkinter.Frame(self.canvas, bg=COLOR.get_colour("Normal2"))
             self.scrollable_frame.bind(
                 "<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
             )
             self.scrollable_frame.pack(fill="both", expand=True)
 
             self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-            self.canvas.configure(yscrollcommand=scrollbar.set, bg=CONST.get_colour("Normal2"))
+            self.canvas.configure(yscrollcommand=scrollbar.set, bg=COLOR.get_colour("Normal2"))
             self.canvas.bind_all(
                 "<MouseWheel>",
                 lambda event: self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
@@ -131,7 +132,7 @@ class FrontEnd(customtkinter.CTk):
 
         def set_left_bottom_frame(self: FrontEnd) -> None:
             left_bottom_frame = customtkinter.CTkFrame(
-                left_frame, fg_color=CONST.get_colour("Normal2"), height=self.height * 0.1
+                left_frame, fg_color=COLOR.get_colour("Normal2"), height=self.height * 0.1
             )
             left_bottom_frame.pack(anchor="n", fill=tkinter.X, padx=10, pady=10)
 
@@ -140,7 +141,7 @@ class FrontEnd(customtkinter.CTk):
                 customtkinter.CTkButton(
                     left_bottom_frame, image=logo,
                     width=logo.width() + 10, height=logo.height() + 10,
-                    fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover"),
+                    fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover"),
                     text="", command=command
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
             image_buttons("SettingsIcon.png", 3, lambda: self.change_page("Settings Page"))
@@ -150,7 +151,7 @@ class FrontEnd(customtkinter.CTk):
     def _set_right_frame(self) -> None:
         "Creates the right frame for the structure of the frontend. Should only be called once."
         self.right_frame = customtkinter.CTkFrame(
-            self, fg_color=CONST.get_colour("Normal"), corner_radius=0
+            self, fg_color=COLOR.get_colour("Normal"), corner_radius=0
         )
 
         #Fill
@@ -164,7 +165,7 @@ class FrontEnd(customtkinter.CTk):
             "Account Page" : Pages.account_page(),
             "New Account Page" : Pages.new_account_page(),
             "Unknown Page" : customtkinter.CTkFrame(
-                corner_radius=0, fg_color=CONST.get_colour("Normal")
+                corner_radius=0, fg_color=COLOR.get_colour("Normal")
             )
         }
         self.current_page = None

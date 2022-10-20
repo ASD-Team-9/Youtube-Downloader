@@ -5,6 +5,7 @@ import time
 from frontend.download_item import DownloadItem
 from backend.action_thread import ActionThread
 import backend.constant_variables as CONST
+import backend.format as Format
 
 class Downloader:
     """
@@ -15,9 +16,20 @@ class Downloader:
         download(video_name, args)\n
         download_audio(url)\n
     """
+
+
+
     def __init__(self) -> None:
         self.queue = []
         self.update_downloader() #TODO: Read from preferences and choose to auto update or not.
+
+    def get_default_args(self) -> list[str]:
+        "Getting the default arguements"
+        return [
+        "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
+        "--progress-template",
+        "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
+        ]
 
     def update_downloader(self) -> None:
         "Updates the downloader. Simply calling this is enough."
@@ -25,14 +37,15 @@ class Downloader:
             subprocess.run([CONST.YTDLP, "-U"], check=True)
         ActionThread("auto update thread", check_updating)
 
-    def download(self, video_name: str, args: list[str]) -> None:
+    def download(self, video_details: dict, format_type: str, quality_type: str) -> None:
         """
         Download a video by using threads
 
-        Parameters: video_name, args
+        Parameters: video_details, format_type, quality_type
 
-        video_name: The video title
-        args: The arguements/options from yt-dlp
+        video_details: The video details in dictionary
+        format_type: Type of format in string
+        quality_type: Type of quality in string
         """
         def begin_downloading() -> None:
             if CONST.THREADS["auto update thread"] is not None:
@@ -57,7 +70,8 @@ class Downloader:
                             pass
                 if process.returncode != 0:
                     print("ERROR HERE") #TODO: Update failure on queued item
-        self.queue.append(DownloadItem(video_name, args))
+        download_url = [CONST.YTDLP, video_details["link"]] + self.get_default_args() + Format.update_video_args(format_type, quality_type)
+        self.queue.append(DownloadItem(video_details["title"], download_url))
         ActionThread("downloading thread", begin_downloading)
 
     def download_audio(self, url):
