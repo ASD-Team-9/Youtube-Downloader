@@ -110,6 +110,7 @@ def new_account_page() -> customtkinter.CTkFrame:
             file.write('\n'+ username + '|' + password)
             file.close()
         messagebox.showinfo("Create New Account","Account Created!")
+        CONST.FRONTEND.change_page("Account Page")
 
     page = _get_page_template()
 

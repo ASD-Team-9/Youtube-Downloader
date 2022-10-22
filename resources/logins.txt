@@ -1,4 +1,1 @@
 admin|admin
-Leo|leo
-test|Test
-login|Login
