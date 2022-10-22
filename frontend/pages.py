@@ -55,20 +55,23 @@ def history_page() -> customtkinter.CTkFrame:
 
 def account_page() -> customtkinter.CTkFrame:
     "The account page for the frontend."
+
     def login() -> None:
-        with open("resources/logins.txt", "r", encoding="utf-8"):
-            correct_username = username.get()
-            correct_password = password.get()
-
-        for line in open("resources/logins.txt", "r", encoding="utf-8").readlines():
-            login_info = line.split("|")
-
-        if correct_username == login_info[0] and correct_password == login_info[1]:
-            messagebox.showinfo("Login","Login is successful")
-            #TODO: Remove this and just log in, hook this up to a new page.
-            CONST.FRONTEND.change_page("History Page")
-        else:
-            messagebox.showinfo("Login","Login unsuccessful try again")
+        while True:
+            usernameInput = username.get()
+            passwordInput = password.get()
+            with open("resources/logins.txt", "r", encoding="utf-8") as accounts_file:
+                for line in accounts_file:
+                    usernameLogin, passwordLogin = line.replace("\n","").split("|")
+                    if usernameInput == usernameLogin and passwordInput == passwordLogin:
+                        messagebox.showinfo("Login","Login is successful")
+                        #TODO: Remove this and just log in, hook this up to a new page.
+                        CONST.FRONTEND.change_page("History Page")
+                        break
+                else:
+                    messagebox.showinfo("Login","Login unsuccessful try again")
+                    break
+                break
 
     page = _get_page_template()
 
@@ -103,9 +106,9 @@ def new_account_page() -> customtkinter.CTkFrame:
     def register():
         username = new_username.get()
         password = new_password.get()
-        file = open("resources/logins.txt","a", encoding="utf-8")
-        file.write(f"{username}|{password}\n")
-        file.close()
+        with open("resources/logins.txt","a", encoding="utf-8") as file:
+            file.write('\n'+ username + '|' + password)
+            file.close()
         messagebox.showinfo("Create New Account","Account Created!")
 
     page = _get_page_template()
