@@ -77,6 +77,13 @@ class Video:
         )
         CONST.FRONTEND.change_page("Video Details Page")
 
+import datetime
+import tkinter as tk
+from tkinter import filedialog
+from tkVideoPlayer import TkinterVideo
+
+
+
 def _get_page_template() -> customtkinter.CTkFrame:
     "Returns an empty template of the page."
     return customtkinter.CTkFrame(
@@ -121,25 +128,39 @@ def settings_page() -> customtkinter.CTkFrame:
     colour_choice.set("Normal")
     return page
 
+def history_page() -> customtkinter.CTkFrame:
+    "The history page"
+    page = _get_page_template()
+
+    title = customtkinter.CTkLabel(page, text="History Page", fg_color="#321321")
+    title.pack(anchor="nw", padx=10, pady=10)
+
+    return page
+
 def account_page() -> customtkinter.CTkFrame:
     "The account page for the frontend."
+
     def login() -> None:
-        with open("resources/logins.txt", "r", encoding="utf-8") as file: #TODO: Make this dynamic
-            correct_username = file.readline().strip()
-            correct_password = file.readline().strip()
-        if correct_username == username.get() and correct_password == password.get():
-            #TODO: Remove this and just log in, hook this up to a new page.
-            messagebox.showinfo("Login","Login is successful")
-            username.destroy()
-            password.destroy()
-            login_button.destroy()
-            create_account_button.destroy()
-            new_title = customtkinter.CTkLabel(page, text="Playlists", fg_color="#321321")
-            new_title.pack(anchor="nw", padx=10, pady=10)
-        else:
-            messagebox.showinfo("Login","Login unsuccessful try again")
+        while True:
+            usernameInput = username.get()
+            passwordInput = password.get()
+            with open("resources/logins.txt", "r", encoding="utf-8") as accounts_file:
+                for line in accounts_file:
+                    usernameLogin, passwordLogin = line.replace("\n","").split("|")
+                    if usernameInput == usernameLogin and passwordInput == passwordLogin:
+                        messagebox.showinfo("Login","Login is successful")
+                        #TODO: Remove this and just log in, hook this up to a new page.
+                        CONST.FRONTEND.change_page("History Page")
+                        break
+                else:
+                    messagebox.showinfo("Login","Login unsuccessful try again")
+                    break
+                break
 
     page = _get_page_template()
+
+    login_page = customtkinter.CTkLabel(page, text="Login Page", fg_color="#321321")
+    login_page.pack(anchor="nw", padx=10, pady=10)
 
     username = customtkinter.CTkEntry(page, placeholder_text="Username")
     username.pack(side="top",anchor="nw", padx=10)
@@ -156,22 +177,30 @@ def account_page() -> customtkinter.CTkFrame:
     login_button.pack(side="top",anchor="nw", padx=10)
 
     create_account_button = customtkinter.CTkButton(
-        page, text = "Create Account",
-        command = lambda: CONST.FRONTEND.ChangePage("New Account Page"),
-        fg_color = COLOR.get_colour("ButtonNormal"),
-        hover_color = COLOR.get_colour("ButtonHover"), text_color=COLOR.get_colour("Text")
+        page, text="Create Account",command=lambda: 
+        CONST.FRONTEND.change_page("New Account Page"),
+        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
     )
-    create_account_button.pack(side="top",anchor="nw", padx=10, pady=5)
+    create_account_button.pack(side="top",anchor="nw", padx=10)
+    
+    video_player_button = customtkinter.CTkButton(
+        page, text="Video Player", command=video_player,
+        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+    )
+    video_player_button.pack(side="top",anchor="nw", padx=10)
 
     return page
 
 def new_account_page() -> customtkinter.CTkFrame:
     "The new account page for the frontend."
-    def create_account():
+    def register():
+        username = new_username.get()
+        password = new_password.get()
         with open("resources/logins.txt","a", encoding="utf-8") as file:
-            file.write(new_username.get() + "\n")
-            file.write(new_password.get() + "\n")
+            file.write('\n'+ username + '|' + password)
+            file.close()
         messagebox.showinfo("Create New Account","Account Created!")
+        CONST.FRONTEND.change_page("Account Page")
 
     page = _get_page_template()
 
@@ -180,19 +209,111 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     new_username = customtkinter.CTkEntry(page, placeholder_text="New Username")
     new_username.pack(side="top",anchor="nw", padx=10)
-    new_username.bind("<Return>", create_account)
+    new_username.bind("<Return>", register)
 
     new_password = customtkinter.CTkEntry(page, placeholder_text="New Password")
     new_password.pack(side="top",anchor="nw", padx=10,pady=10)
-    new_password.bind("<Return>", create_account)
+    new_password.bind("<Return>", register)
 
     create_button = customtkinter.CTkButton(
-        page, text="Create Account", command=create_account,
-        fg_color=COLOR.get_colour("ButtonNormal"),
-        hover_color=COLOR.get_colour("ButtonHover"),
-        text_color=COLOR.get_colour("Text")
+        page, text="Create Account", command=register,
+        fg_color=CONST.get_colour("ButtonNormal"),
+        hover_color=CONST.get_colour("ButtonHover")
     )
     create_button.pack(side="top",anchor="nw", padx=10)
+
+    return page
+
+def video_player() -> customtkinter.CTkFrame:
+
+    page = _get_page_template()
+
+    def update_duration(event):
+        """ updates the duration after finding the duration """
+        duration = vid_player.video_info()["duration"]
+        end_time["text"] = str(datetime.timedelta(seconds=duration))
+        progress_slider["to"] = duration
+
+
+    def update_scale(event):
+        """ updates the scale value """
+        progress_slider.set(vid_player.current_duration())
+
+
+    def load_video():
+        """ loads the video """
+        file_path = filedialog.askopenfilename()
+
+        if file_path:
+            vid_player.load(file_path)
+
+            progress_slider.config(to=0, from_=0)
+            play_pause_btn["text"] = "Play"
+            progress_slider.set(0)
+
+
+    def seek(event=None):
+        """ used to seek a specific timeframe """
+        vid_player.seek(int(progress_slider.get()))
+
+
+    def skip(value: int):
+        """ skip seconds """
+        vid_player.seek(int(progress_slider.get())+value)
+        progress_slider.set(progress_slider.get() + value)
+
+
+    def play_pause():
+        """ pauses and plays """
+        if vid_player.is_paused():
+            vid_player.play()
+            play_pause_btn["text"] = "Pause"
+
+        else:
+            vid_player.pause()
+            play_pause_btn["text"] = "Play"
+
+
+    def video_ended(event):
+        """ handle video ended """
+        progress_slider.set(progress_slider["to"])
+        play_pause_btn["text"] = "Play"
+        progress_slider.set(0)
+
+
+    root = tk.Tk()
+    root.title("Video Player")
+
+    load_btn = tk.Button(root, text="Load", command=load_video)
+    load_btn.pack()
+
+    vid_player = TkinterVideo(scaled=True, master=root)
+    vid_player.pack(expand=True, fill="both")
+
+    play_pause_btn = tk.Button(root, text="Play", command=play_pause)
+    play_pause_btn.pack()
+
+    skip_plus_5sec = tk.Button(root, text="Skip -5 sec", command=lambda: skip(-5))
+    skip_plus_5sec.pack(side="left")
+
+    start_time = tk.Label(root, text=str(datetime.timedelta(seconds=0)))
+    start_time.pack(side="left")
+
+    progress_slider = tk.Scale(root, from_=0, to=0, orient="horizontal")
+    progress_slider.bind("<ButtonRelease-1>", seek)
+    progress_slider.pack(side="left", fill="x", expand=True)
+
+    end_time = tk.Label(root, text=str(datetime.timedelta(seconds=0)))
+    end_time.pack(side="left")
+
+    vid_player.bind("<<Duration>>", update_duration)
+    vid_player.bind("<<SecondChanged>>", update_scale)
+    vid_player.bind("<<Ended>>", video_ended )
+
+    skip_plus_5sec = tk.Button(root, text="Skip +5 sec", command=lambda: skip(5))
+    skip_plus_5sec.pack(side="left")
+
+    root.mainloop()
 
     return page
 
