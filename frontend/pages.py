@@ -179,13 +179,13 @@ def account_page() -> customtkinter.CTkFrame:
     create_account_button = customtkinter.CTkButton(
         page, text="Create Account",command=lambda: 
         CONST.FRONTEND.change_page("New Account Page"),
-        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+        fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     create_account_button.pack(side="top",anchor="nw", padx=10)
     
     video_player_button = customtkinter.CTkButton(
         page, text="Video Player", command=video_player,
-        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+        fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     video_player_button.pack(side="top",anchor="nw", padx=10)
 
@@ -217,8 +217,8 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     create_button = customtkinter.CTkButton(
         page, text="Create Account", command=register,
-        fg_color=CONST.get_colour("ButtonNormal"),
-        hover_color=CONST.get_colour("ButtonHover")
+        fg_color=COLOR.get_colour("ButtonNormal"),
+        hover_color=COLOR.get_colour("ButtonHover")
     )
     create_button.pack(side="top",anchor="nw", padx=10)
 
