@@ -1,8 +1,10 @@
 "The main frontend class"
+from cgitb import enable
 import tkinter
 from tkinter import filedialog
 from tkinter import messagebox
 import customtkinter
+from setuptools import Command
 import youtubesearchpython as YouTube
 import frontend.color as COLOR
 
@@ -229,3 +231,13 @@ def change_download_location() -> None:
     new_location = filedialog.askdirectory(initialdir=CONST.DOWNLOAD_PATH)
     if new_location != "":
         CONST.DOWNLOAD_PATH = new_location
+
+def switch_autodownload() -> None:    
+    if CONST.CHECK_AUTO_UPDATE == "enabled":
+        with open("resources/update.txt", "w", encoding="utf-8") as w:
+            w.clear()
+            w.write("enabled")
+    else:
+        with open("resources/update.txt", "w", encoding="utf-8") as w:
+            w.clear()
+            w.write("disabled")

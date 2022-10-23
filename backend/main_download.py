@@ -34,7 +34,10 @@ class Downloader:
     def update_downloader(self) -> None:
         "Updates the downloader. Simply calling this is enough."
         def check_updating():
-            subprocess.run([CONST.YTDLP, "-U"], check=True)
+            with open("resources/update.txt", "r", encoding="utf-8") as f:
+                check = f.readline()   
+            if check == "enabled":
+                subprocess.run([CONST.YTDLP, "-U"], check=True)
         ActionThread("auto update thread", check_updating)
 
     def download(self, video_details: dict, format_type: str, quality_type: str) -> None:

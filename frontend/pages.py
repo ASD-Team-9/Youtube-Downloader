@@ -1,4 +1,5 @@
 "Pages for the main frontend class."
+
 from tkinter import CENTER, messagebox
 import tkinter
 from tkinter import ttk
@@ -19,7 +20,14 @@ def _get_page_template() -> customtkinter.CTkFrame:
 def settings_page() -> customtkinter.CTkFrame:
     "The settings page for the frontend."
     page = _get_page_template()
-    autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update", text_color=COLOR.get_colour("Text"))
+    autoupdate = customtkinter.CTkCheckBox(
+        page,
+        text="Enable Auto Update",
+        text_color=COLOR.get_colour("Text"),
+        command=Frontend.switch_autodownload,
+        variable=CONST.CHECK_AUTO_UPDATE,
+        onvalue='enabled',
+        offvalue='disabled')
     autoupdate.pack(anchor="nw", padx=10, pady=20)
     autoupdate.select() #TODO: Make this dynamic with login
 
@@ -125,6 +133,7 @@ def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     page = _get_page_template()
     video_treeview = ttk.Treeview(page)
     video_treeview.pack(fill=tkinter.BOTH, expand=True)
+    
     video_treeview['columns'] = ("Title", "Duration", "Link")
     
     video_treeview.column("#0")
@@ -145,6 +154,20 @@ def browser_page(search_results: dict) -> customtkinter.CTkFrame:
             text=customtkinter.CTkLabel(page, image=CONST.THUMBNAILS[-1].thumbnail),
             values=(video["title"], video["duration"], video["link"])
         )
+
+    def select_video():
+        selected = video_treeview.focus()
+        values = video_treeview.item(selected)
+        video_details_page(True, values)
+
+
+    select_video_button = customtkinter.CTkButton(
+        page, command=select_video,
+        text="Download", 
+        fg_color=COLOR.get_colour("ButtonNormal"),
+        text_color=COLOR.get_colour("Text"))
+    select_video_button.pack(anchor="sw", padx=20, pady=20)
+
     return page
 
 #TODO: came_from_browser_page implementation
