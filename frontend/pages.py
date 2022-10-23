@@ -1,11 +1,14 @@
 "Pages for the main frontend class."
-from tkinter import messagebox
+from email.policy import default
+from tkinter import CENTER, messagebox
+import tkinter
 from urllib.request import urlopen
 from io import BytesIO
-
+from tkinter import ttk
 from PIL import Image, ImageTk
 import customtkinter
-
+from tomlkit import string
+from backend.action_thread import ActionThread
 import backend.constant_variables as CONST
 import backend.format as Format
 import frontend.frontend as Frontend
@@ -124,13 +127,30 @@ def new_account_page() -> customtkinter.CTkFrame:
 def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     "The browser page for the front end."
     page = _get_page_template()
+    video_treeview = ttk.Treeview(page)
+    video_treeview.pack(fill=tkinter.BOTH, expand=True)
+    video_treeview['columns'] = ("Title", "Duration", "Link")
+    
+    video_treeview.column("#0")
+    video_treeview.column("Title")
+    video_treeview.column("Duration",anchor=CENTER, width=10)
+    video_treeview.column("Link")
+
+    video_treeview.heading("#0", text="Thumbnail")
+    video_treeview.heading("Title", text="Title")
+    video_treeview.heading("Duration", text="Duration")
+    video_treeview.heading("Link", text="Link")
 
     for video in search_results:
         for key in ["title", "duration", "thumbnails", "link"]:
-            title = customtkinter.CTkLabel(
-                page, text=f"{key}: {video[key]}", fg_color=COLOR.get_colour("Text")
+            video_treeview.insert(
+                parent="",
+                index=tkinter.END,
+                text=customtkinter.CTkLabel(page, image=video["thumbnails"][-1]['url']),
+                values=(video["title"],video["duration"],video["link"])
             )
-            title.pack(anchor="nw", padx=10, pady=10)
+            
+            
     return page
 
 #TODO: came_from_browser_page implementation
@@ -205,3 +225,4 @@ class Thumbnail:
             CONST.THUMBNAILS.append(self)
         except Exception:
             pass
+
