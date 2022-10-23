@@ -9,6 +9,13 @@ import customtkinter
 import backend.constant_variables as CONST
 import frontend.frontend as Frontend
 
+import datetime
+import tkinter as tk
+from tkinter import filedialog
+from tkVideoPlayer import TkinterVideo
+
+
+
 def _get_page_template() -> customtkinter.CTkFrame:
     "Returns an empty template of the page."
     return customtkinter.CTkFrame(
@@ -93,11 +100,17 @@ def account_page() -> customtkinter.CTkFrame:
     login_button.pack(side="top",anchor="nw", padx=10)
 
     create_account_button = customtkinter.CTkButton(
-        page, text="Create Account",
-        command=lambda: CONST.FRONTEND.change_page("New Account Page"),
+        page, text="Create Account",command=lambda: 
+        CONST.FRONTEND.change_page("New Account Page"),
         fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
     )
-    create_account_button.pack(side="top",anchor="nw", padx=10, pady=5)
+    create_account_button.pack(side="top",anchor="nw", padx=10)
+    
+    video_player_button = customtkinter.CTkButton(
+        page, text="Video Player", command=video_player,
+        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+    )
+    video_player_button.pack(side="top",anchor="nw", padx=10)
 
     return page
 
@@ -131,6 +144,100 @@ def new_account_page() -> customtkinter.CTkFrame:
         hover_color=CONST.get_colour("ButtonHover")
     )
     create_button.pack(side="top",anchor="nw", padx=10)
+
+    return page
+
+def video_player() -> customtkinter.CTkFrame:
+
+    page = _get_page_template()
+
+    def update_duration(event):
+        """ updates the duration after finding the duration """
+        duration = vid_player.video_info()["duration"]
+        end_time["text"] = str(datetime.timedelta(seconds=duration))
+        progress_slider["to"] = duration
+
+    def update_scale(event):
+        """ updates the scale value """
+        progress_value.set(vid_player.current_duration())
+
+
+    def load_video():
+        """ loads the video """
+        file_path = filedialog.askopenfilename()
+
+        if file_path:
+            vid_player.load(file_path)
+
+            progress_slider.config(to=0, from_=0)
+            play_pause_btn["text"] = "Play"
+            progress_value.set(0)
+
+
+    def seek(value):
+        """ used to seek a specific timeframe """
+        vid_player.seek(int(value))
+
+
+    def skip(value: int):
+        """ skip seconds """
+        vid_player.seek(int(progress_slider.get())+value)
+        progress_value.set(progress_slider.get() + value)
+
+
+    def play_pause():
+        """ pauses and plays """
+        if vid_player.is_paused():
+            vid_player.play()
+            play_pause_btn["text"] = "Pause"
+
+        else:
+            vid_player.pause()
+            play_pause_btn["text"] = "Play"
+
+
+    def video_ended(event):
+        """ handle video ended """
+        progress_slider.set(progress_slider["to"])
+        play_pause_btn["text"] = "Play"
+        progress_slider.set(0)
+
+
+    root = tk.Tk()
+    root.title("Tkinter media")
+
+    load_btn = tk.Button(root, text="Load", command=load_video)
+    load_btn.pack()
+
+    vid_player = TkinterVideo(scaled=True, master=root)
+    vid_player.pack(expand=True, fill="both")
+
+    play_pause_btn = tk.Button(root, text="Play", command=play_pause)
+    play_pause_btn.pack()
+
+    skip_plus_5sec = tk.Button(root, text="Skip -5 sec", command=lambda: skip(-5))
+    skip_plus_5sec.pack(side="left")
+
+    start_time = tk.Label(root, text=str(datetime.timedelta(seconds=0)))
+    start_time.pack(side="left")
+
+    progress_value = tk.IntVar(root)
+
+    progress_slider = tk.Scale(root, variable=progress_value, from_=0, to=0, orient="horizontal", command=seek)
+    # progress_slider.bind("<ButtonRelease-1>", seek)
+    progress_slider.pack(side="left", fill="x", expand=True)
+
+    end_time = tk.Label(root, text=str(datetime.timedelta(seconds=0)))
+    end_time.pack(side="left")
+
+    vid_player.bind("<<Duration>>", update_duration)
+    vid_player.bind("<<SecondChanged>>", update_scale)
+    vid_player.bind("<<Ended>>", video_ended )
+
+    skip_plus_5sec = tk.Button(root, text="Skip +5 sec", command=lambda: skip(5))
+    skip_plus_5sec.pack(side="left")
+
+    root.mainloop()
 
     return page
 
