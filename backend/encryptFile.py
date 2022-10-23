@@ -1,3 +1,5 @@
+from cryptography.fernet import Fernet
+
 # reading key from file
 key = ''
 with open('secretLoginKey.key','rb') as file:
@@ -5,13 +7,14 @@ with open('secretLoginKey.key','rb') as file:
 
 # reading data from file
 data = ''
-with open ("resources/logins.txt","rb", encoding="utf-8") as file:
+with open ("resources/logins.txt","rb") as file:
     data = file.read()
 
 # encrypting the data
-from cryptography.fernet import Fernet
-
 f = Fernet(key)
 
+encryptedData = f.encrypt(data)
 
 # saving the encrypted data into a file
+with open('resources/encryptedLogins.txt', 'wb') as file:
+    file.write(encryptedData)
