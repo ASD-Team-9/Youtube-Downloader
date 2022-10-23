@@ -1,16 +1,12 @@
 "Pages for the main frontend class."
-from email.policy import default
 from tkinter import CENTER, messagebox
 import tkinter
+from tkinter import ttk
 from urllib.request import urlopen
 from io import BytesIO
-from tkinter import ttk
 from PIL import Image, ImageTk
 import customtkinter
-from tomlkit import string
-from backend.action_thread import ActionThread
 import backend.constant_variables as CONST
-import backend.format as Format
 import frontend.frontend as Frontend
 import frontend.color as COLOR
 
@@ -142,15 +138,13 @@ def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     video_treeview.heading("Link", text="Link")
 
     for video in search_results:
-        for key in ["title", "duration", "thumbnails", "link"]:
-            video_treeview.insert(
-                parent="",
-                index=tkinter.END,
-                text=customtkinter.CTkLabel(page, image=video["thumbnails"][-1]['url']),
-                values=(video["title"],video["duration"],video["link"])
-            )
-            
-            
+        Thumbnail(video["thumbnails"][-1]['url'])
+        video_treeview.insert(
+            parent="",
+            index=tkinter.END,
+            text=customtkinter.CTkLabel(page, image=CONST.THUMBNAILS[-1].thumbnail),
+            values=(video["title"], video["duration"], video["link"])
+        )
     return page
 
 #TODO: came_from_browser_page implementation
