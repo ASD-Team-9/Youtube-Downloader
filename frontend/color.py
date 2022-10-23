@@ -1,4 +1,4 @@
-#Dictionary of the project's colour palette.
+"Dictionary of the project's colour palette."
 THEME = "Default"
 COLOURS: dict[str, dict[str, (str, str)]] = {
     "Mode": { #DO NOT USE BUT FOLLOW.

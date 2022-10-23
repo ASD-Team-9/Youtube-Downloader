@@ -14,8 +14,6 @@ AZURE_TEST = False
 #A list to hold all the references of thumbnail images as Python cleans images aggressively.
 THUMBNAILS = []
 
-CHECK_AUTO_UPDATE = "enabled"
-
 #Responsible for holding all the threads.
 THREADS: dict[str, ActionThread] = {
     "auto update thread": None,
@@ -45,4 +43,3 @@ def _ffmpeg():
     program = "ffmpeg" if platform.system() == "Darwin" else "ffmpeg.exe"
     return f"{path}/../resources/{program}"
 FFMPEG = _ffmpeg()
-

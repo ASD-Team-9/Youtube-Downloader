@@ -1,19 +1,16 @@
 "The main frontend class"
-from cgitb import enable
 import tkinter
 from tkinter import filedialog
 from tkinter import messagebox
 import customtkinter
-from setuptools import Command
 import youtubesearchpython as YouTube
-import frontend.color as COLOR
 
-#Other modules
+import frontend.color as COLOR
+import frontend.pages as Pages
 import backend.constant_variables as CONST
 import backend.search as searcher
 from backend.action_thread import ActionThread
 from backend.main_download import Downloader
-import frontend.pages as Pages
 
 class FrontEnd(customtkinter.CTk):
     "The main class for the front end."
@@ -143,7 +140,8 @@ class FrontEnd(customtkinter.CTk):
                 customtkinter.CTkButton(
                     left_bottom_frame, image=logo,
                     width=logo.width() + 10, height=logo.height() + 10,
-                    fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover"),
+                    fg_color=COLOR.get_colour("ButtonNormal"),
+                    hover_color=COLOR.get_colour("ButtonHover"),
                     text="", command=command
                 ).pack(side=tkinter.LEFT, fill=tkinter.X, expand=True, padx=10, pady=10)
             image_buttons("SettingsIcon.png", 3, lambda: self.change_page("Settings Page"))
@@ -196,14 +194,14 @@ class FrontEnd(customtkinter.CTk):
             return YouTube.Video.get(url)
 
         def search_input(query) -> dict:
-            return YouTube.VideosSearch(query, limit = 20).result()["result"]
+            return YouTube.VideosSearch(query, limit = 3).result()["result"] #TODO: Set to 10
 
         next_page = "Unknown Page"
         if searcher.is_playist_url(user_input): #TODO: Check if playlist first before video
             print("Detect playist URL")
         elif searcher.is_video_url(user_input):
             next_page = "Video Details Page"
-            self.pages[next_page] = Pages.video_details_page(False, search_url(user_input))
+            self.pages[next_page] = Pages.video_details_page(search_url(user_input))
         else:
             next_page = "Browser Page"
             self.pages[next_page] = Pages.browser_page(search_input(user_input))
@@ -232,12 +230,7 @@ def change_download_location() -> None:
     if new_location != "":
         CONST.DOWNLOAD_PATH = new_location
 
-def switch_autodownload() -> None:    
-    if CONST.CHECK_AUTO_UPDATE == "enabled":
-        with open("resources/update.txt", "w", encoding="utf-8") as w:
-            w.clear()
-            w.write("enabled")
-    else:
-        with open("resources/update.txt", "w", encoding="utf-8") as w:
-            w.clear()
-            w.write("disabled")
+def switch_autodownload() -> None:
+    "This checks if whether to auto update or not"
+    with open("resources/update.txt", "w", encoding="utf-8") as file:
+        file.write("enabled" if CONST.FRONTEND.autoupdate.get() else "disabled")
