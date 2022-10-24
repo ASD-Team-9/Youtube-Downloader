@@ -255,7 +255,8 @@ def video_player():
 
     def load_video():
         """ loads the video """
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(filetypes=[
+                       ('Video Files', ["*.mp4"])])
 
         if file_path:
             vid_player.load(file_path)
