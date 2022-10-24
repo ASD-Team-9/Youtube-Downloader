@@ -168,7 +168,7 @@ class FrontEnd(customtkinter.CTk):
             "Unknown Page" : customtkinter.CTkFrame(
                 corner_radius=0, fg_color=COLOR.get_colour("Normal")
             )
-            
+
         }
         self.current_page = None
 
@@ -232,7 +232,7 @@ def change_download_location() -> None:
     if new_location != "":
         CONST.DOWNLOAD_PATH = new_location
 
-def switch_autodownload() -> None:
+def switch_auto_update() -> None:
     "This checks if whether to auto update or not"
     with open("resources/update.txt", "w", encoding="utf-8") as file:
         file.write("enabled" if CONST.FRONTEND.autoupdate.get() else "disabled")

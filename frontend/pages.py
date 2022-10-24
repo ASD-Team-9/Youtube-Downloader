@@ -1,15 +1,19 @@
 "Pages for the main frontend class."
 from tkinter import messagebox
 import tkinter
+from tkinter import filedialog
+import os
+import os.path
 from urllib.request import urlopen
 from io import BytesIO
+import datetime
+
 from PIL import Image, ImageTk
 import customtkinter
 import youtubesearchpython as YouTube
-import os
-import os.path
-from os import path
 from cryptography.fernet import Fernet
+
+from tkVideoPlayer import TkinterVideo
 
 import backend.constant_variables as CONST
 import frontend.frontend as Frontend
@@ -81,13 +85,6 @@ class Video:
         )
         CONST.FRONTEND.change_page("Video Details Page")
 
-import datetime
-import tkinter as tk
-from tkinter import filedialog
-from tkVideoPlayer import TkinterVideo
-
-
-
 def _get_page_template() -> customtkinter.CTkFrame:
     "Returns an empty template of the page."
     return customtkinter.CTkFrame(
@@ -98,15 +95,15 @@ def settings_page() -> customtkinter.CTkFrame:
     "The settings page for the frontend."
     page = _get_page_template()
 
-    """CONST.FRONTEND.autoupdate = customtkinter.CTkCheckBox(
+    CONST.FRONTEND.autoupdate = customtkinter.CTkCheckBox(
         page, text="Enable Auto Update",
         text_color=COLOR.get_colour("Text"),
-        command=Frontend.switch_auto(download)
-    CONST.FRONTEND.autoupdate.pack(anchor="nw", padx=10, pady=20))"""
+        command=Frontend.switch_auto_update)
+    CONST.FRONTEND.autoupdate.pack(anchor="nw", padx=10, pady=20)
 
     with open("resources/update.txt", "r", encoding="utf-8") as file:
-            if file.readline() == "enabled":
-                CONST.FRONTEND.autoupdate.select()
+        if file.readline() == "enabled":
+            CONST.FRONTEND.autoupdate.select()
 
     updatebutton = customtkinter.CTkButton(
         page, text="Update", command=Frontend.update_downloader,
@@ -122,7 +119,9 @@ def settings_page() -> customtkinter.CTkFrame:
     )
     change_location.pack(anchor="nw", padx=20, pady=20)
 
-    colour_choice_label = customtkinter.CTkLabel(page, text="Choose Colour Scheme:", text_color=COLOR.get_colour("Text"))
+    colour_choice_label = customtkinter.CTkLabel(
+        page, text="Choose Colour Scheme:", text_color=COLOR.get_colour("Text")
+    )
     colour_choice_label.pack(anchor="nw", padx=20, pady=20)
 
     colour_choice = customtkinter.CTkOptionMenu(
@@ -145,45 +144,22 @@ def account_page() -> customtkinter.CTkFrame:
     "The account page for the frontend."
 
     def login() -> None:
-        while True:
-            usernameInput = username.get()
-            passwordInput = password.get()
-            if (path.exists("resources/encryptedLogins.txt")):
-                # Reading the key from file
-                key = ''
-                with open('secretLoginKey.key','rb') as file:
-                    key = file.read()
+        if os.path.exists("resources/encryptedLogins.txt"):
+            # Reading the key from file
+            with open('resources/secretLoginKey.key','rb') as file:
+                fernet = Fernet(file.read())
 
-                # Reading the encrypted data from file
-                encryptedData = ''
-                with open ("resources/encryptedLogins.txt","rb") as file:
-                    encryptedData = file.read()
+            # Read the encrypted data from file
+            with open("resources/encryptedLogins.txt","rb+") as file:
+                decrypted_data = fernet.decrypt(file.read()).decode()
+                print(decrypted_data)
 
-                # Decreypt the data
-                f = Fernet(key)
-
-                decryptedData = f.decrypt(encryptedData)
-
-                with open("resources/logins.txt","wb") as file:
-                    file.write(decryptedData)
-                    file.close()
-
-            with open("resources/logins.txt", "r", encoding="utf-8") as accounts_file:
-                for line in accounts_file:
-                    usernameLogin, passwordLogin = line.replace("\n","").split("|")
-                    if usernameInput == usernameLogin and passwordInput == passwordLogin:
-                        messagebox.showinfo("Login","Login is successful")
-                        #TODO: Remove this and just log in, hook this up to a new page.
-                        CONST.FRONTEND.change_page("History Page")
-                        break
-                    if os.path.exists("resources/logins.txt"):
-                        os.remove("resources/logins.txt")
-                    else:
-                        messagebox.showinfo("Error","File not found")
-                else:
-                    messagebox.showinfo("Login","Login unsuccessful try again")
-                    break
-                break
+            for line in decrypted_data.split("\n"):
+                details = line.split("|")
+                if details[0] == username.get() and details[1] == password.get():
+                    CONST.FRONTEND.change_page("History Page")
+                    return
+            messagebox.showinfo("Login","Login unsuccessful try again")
 
     page = _get_page_template()
 
@@ -192,11 +168,11 @@ def account_page() -> customtkinter.CTkFrame:
 
     username = customtkinter.CTkEntry(page, placeholder_text="Username")
     username.pack(side="top",anchor="nw", padx=10)
-    username.bind("<Return>", login)
+    username.bind("<Return>", lambda e: login())
 
     password = customtkinter.CTkEntry(page, placeholder_text="Password", show="*")
     password.pack(side="top",anchor="nw", padx=10,pady=10)
-    password.bind("<Return>", login)
+    password.bind("<Return>", lambda e: login())
 
     login_button = customtkinter.CTkButton(
         page, text="Login", command=login, text_color=COLOR.get_colour("Text"),
@@ -210,7 +186,7 @@ def account_page() -> customtkinter.CTkFrame:
         fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     create_account_button.pack(side="top",anchor="nw", padx=10)
-    
+
     video_player_button = customtkinter.CTkButton(
         page, text="Video Player", command=video_player,
         fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
@@ -224,81 +200,19 @@ def new_account_page() -> customtkinter.CTkFrame:
     def register():
         username = new_username.get()
         password = new_password.get()
-        if (path.exists("resources/encryptedLogins.txt")):
-            # Reading the key from file
-            key = ''
-            with open('secretLoginKey.key','rb') as file:
-                key = file.read()
 
-            # Reading the encrypted data from file
-            encryptedData = ''
-            with open ("resources/encryptedLogins.txt","rb") as file:
-                encryptedData = file.read()
+        # Read the key from file
+        with open('resources/secretLoginKey.key','rb') as file:
+            fernet = Fernet(file.read())
 
-            # Decreypt the data
-            f = Fernet(key)
+        # Read the encrypted data from file
+        with open("resources/encryptedLogins.txt","rb+") as file:
+            decrypted_data = fernet.decrypt(file.read()).decode()
+            decrypted_data += f"\n{username}|{password}"
+            print(decrypted_data)
 
-            decryptedData = f.decrypt(encryptedData)
-            with open("resources/logins.txt","wb") as file:
-                file.write(decryptedData)
-                file.close()
-
-            with open("resources/logins.txt","a") as file:
-                file.write('\n'+ username + '|' + password)
-                file.close()
-
-            key = ''
-            with open('secretLoginKey.key','rb') as file:
-                key = file.read()
-
-            # reading data from file
-            data = ''
-            with open ("resources/logins.txt","rb") as file:
-                data = file.read()
-
-            # encrypting the data
-            f = Fernet(key)
-
-            encryptedData = f.encrypt(data)
-
-            # saving the encrypted data into a file
-            with open('resources/encryptedLogins.txt', 'wb') as file:
-                file.write(encryptedData)
-                file.close()
-                if os.path.exists("resources/logins.txt"):
-                    os.remove("resources/logins.txt")
-                else:
-                    messagebox.showinfo("Error","File not found")
-
-        else:
-            with open("resources/logins.txt","w", encoding="utf-8") as file:
-                file.write(username + '|' + password)
-                file.close()
-
-            key = ''
-            with open('secretLoginKey.key','rb') as file:
-                key = file.read()
-
-            # reading data from file
-            data = ''
-            with open ("resources/logins.txt","rb") as file:
-                data = file.read()
-
-            # encrypting the data
-            f = Fernet(key)
-
-            encryptedData = f.encrypt(data)
-
-            # saving the encrypted data into a file
-            with open('resources/encryptedLogins.txt', 'wb') as file:
-                file.write(encryptedData)
-                file.close()
-                if os.path.exists("resources/logins.txt"):
-                    os.remove("resources/logins.txt")
-                else:
-                    messagebox.showinfo("Error","File not found")
-
-        messagebox.showinfo("Create New Account","Account Created!")
+        with open("resources/encryptedLogins.txt","wb") as file:
+            file.write(fernet.encrypt(decrypted_data.encode()))
         CONST.FRONTEND.change_page("Account Page")
 
     page = _get_page_template()
@@ -308,11 +222,11 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     new_username = customtkinter.CTkEntry(page, placeholder_text="New Username")
     new_username.pack(side="top",anchor="nw", padx=10)
-    new_username.bind("<Return>", register)
+    new_username.bind("<Return>", lambda e: register())
 
     new_password = customtkinter.CTkEntry(page, placeholder_text="New Password")
     new_password.pack(side="top",anchor="nw", padx=10,pady=10)
-    new_password.bind("<Return>", register)
+    new_password.bind("<Return>", lambda e: register())
 
     create_button = customtkinter.CTkButton(
         page, text="Create Account", command=register,
@@ -324,7 +238,7 @@ def new_account_page() -> customtkinter.CTkFrame:
     return page
 
 def video_player() -> customtkinter.CTkFrame:
-
+    "Video Player page."
     page = _get_page_template()
 
     def update_duration(event):
@@ -380,36 +294,36 @@ def video_player() -> customtkinter.CTkFrame:
         progress_slider.set(0)
 
 
-    root = tk.Tk()
+    root = tkinter.Tk()
     root.title("Video Player")
 
-    load_btn = tk.Button(root, text="Load", command=load_video)
+    load_btn = tkinter.Button(root, text="Load", command=load_video)
     load_btn.pack()
 
     vid_player = TkinterVideo(scaled=True, master=root)
     vid_player.pack(expand=True, fill="both")
 
-    play_pause_btn = tk.Button(root, text="Play", command=play_pause)
+    play_pause_btn = tkinter.Button(root, text="Play", command=play_pause)
     play_pause_btn.pack()
 
-    skip_plus_5sec = tk.Button(root, text="Skip -5 sec", command=lambda: skip(-5))
+    skip_plus_5sec = tkinter.Button(root, text="Skip -5 sec", command=lambda: skip(-5))
     skip_plus_5sec.pack(side="left")
 
-    start_time = tk.Label(root, text=str(datetime.timedelta(seconds=0)))
+    start_time = tkinter.Label(root, text=str(datetime.timedelta(seconds=0)))
     start_time.pack(side="left")
 
-    progress_slider = tk.Scale(root, from_=0, to=0, orient="horizontal")
+    progress_slider = tkinter.Scale(root, from_=0, to=0, orient="horizontal")
     progress_slider.bind("<ButtonRelease-1>", seek)
     progress_slider.pack(side="left", fill="x", expand=True)
 
-    end_time = tk.Label(root, text=str(datetime.timedelta(seconds=0)))
+    end_time = tkinter.Label(root, text=str(datetime.timedelta(seconds=0)))
     end_time.pack(side="left")
 
     vid_player.bind("<<Duration>>", update_duration)
     vid_player.bind("<<SecondChanged>>", update_scale)
     vid_player.bind("<<Ended>>", video_ended )
 
-    skip_plus_5sec = tk.Button(root, text="Skip +5 sec", command=lambda: skip(5))
+    skip_plus_5sec = tkinter.Button(root, text="Skip +5 sec", command=lambda: skip(5))
     skip_plus_5sec.pack(side="left")
 
     root.mainloop()
