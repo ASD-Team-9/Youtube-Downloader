@@ -5,7 +5,10 @@ import os
 import os.path
 from urllib.request import urlopen
 from io import BytesIO
-import vlc
+try:
+    import vlc
+except FileNotFoundError:
+    pass
 from PIL import Image, ImageTk
 import customtkinter
 import youtubesearchpython as YouTube
