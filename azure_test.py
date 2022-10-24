@@ -2,7 +2,6 @@
 import threading
 from time import sleep
 import backend.constant_variables as CONST
-from frontend.frontend import FrontEnd
 
 def pipeline_test():
     "The main pipeline test"
@@ -51,7 +50,11 @@ def pipeline_test():
     CONST.FRONTEND.quit()
     print("Testing finished!")
 
+def start_test():
+    "Begin the azure test"
+    threading.Thread(target=pipeline_test).start()
+
 if __name__ == "__main__":
     CONST.AZURE_TEST = True
-    threading.Thread(target=pipeline_test).start()
+    from frontend.frontend import FrontEnd
     FrontEnd()

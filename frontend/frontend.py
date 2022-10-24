@@ -3,6 +3,7 @@ import tkinter
 from tkinter import filedialog
 import customtkinter
 import youtubesearchpython as YouTube
+from azure_test import start_test
 
 import frontend.color as COLOR
 import frontend.pages as Pages
@@ -22,6 +23,8 @@ class FrontEnd(customtkinter.CTk):
             self._set_main_settings()
             self._set_left_frame()
             self._set_right_frame()
+            if CONST.AZURE_TEST:
+                start_test()
             self.mainloop()
 
     def _set_main_settings(self) -> None:
