@@ -26,7 +26,8 @@ def pipeline_test():
         url = "https://www.youtube.com/watch?v=_oRxHF8GiUE"
         CONST.FRONTEND.download("Lullaby 「Frozen Starfall」", [CONST.YTDLP, url])
 
-    sleep(1)
+    while CONST.FRONTEND is None:
+        sleep(1)
 
     for each_test in [johnny_test, leo_test, lewis_test, louis_test, ryan_test]:
         status = "Failed"
