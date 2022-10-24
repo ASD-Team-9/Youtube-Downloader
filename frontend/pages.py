@@ -237,7 +237,7 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     return page
 
-def video_player() -> customtkinter.CTkFrame:
+def video_player():
     "Video Player page."
     page = _get_page_template()
 
@@ -327,8 +327,6 @@ def video_player() -> customtkinter.CTkFrame:
     skip_plus_5sec.pack(side="left")
 
     root.mainloop()
-
-    return page
 
 def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     "The browser page for the front end."
