@@ -23,8 +23,9 @@ def pipeline_test():
         print("Doing Ryan's Test...")
 
         print("Downloading a video...")
-        url = "https://www.youtube.com/watch?v=_oRxHF8GiUE"
-        CONST.DOWNLOADER.download({"id": url, "title": "Lullaby 「Frozen Starfall」"}, "Best Audio", "Highest")
+        video_id = "_oRxHF8GiUE"
+        title = "Lullaby 「Frozen Starfall」"
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "Best Audio", "Highest")
 
     while CONST.FRONTEND is None:
         sleep(1)
