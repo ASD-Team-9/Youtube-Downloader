@@ -235,7 +235,7 @@ def account_page() -> customtkinter.CTkFrame:
     create_account_button.pack(side="top",anchor="nw", padx=10)
 
     video_player_button = customtkinter.CTkButton(
-        page, text="Video Player", command=video_player,
+        page, text="Video Player", command=lambda: CONST.FRONTEND.change_page("Video Player Page"),
         fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     video_player_button.pack(side="top",anchor="nw", padx=10)
@@ -285,21 +285,19 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     return page
 
-def video_player():
+def video_player_page():
     "Video Player page."
     page = _get_page_template()
 
-    def update_duration(event):
+    def update_duration():
         """ updates the duration after finding the duration """
         duration = vid_player.video_info()["duration"]
         end_time["text"] = str(datetime.timedelta(seconds=duration))
         progress_slider["to"] = duration
 
-
-    def update_scale(event):
+    def update_scale():
         """ updates the scale value """
         progress_slider.set(vid_player.current_duration())
-
 
     def load_video():
         """ loads the video """
@@ -312,18 +310,16 @@ def video_player():
             progress_slider.config(to=0, from_=0)
             play_pause_btn["text"] = "Play"
             progress_slider.set(0)
+            vid_player.play()
 
-
-    def seek(event=None):
+    def seek():
         """ used to seek a specific timeframe """
         vid_player.seek(int(progress_slider.get()))
-
 
     def skip(value: int):
         """ skip seconds """
         vid_player.seek(int(progress_slider.get())+value)
         progress_slider.set(progress_slider.get() + value)
-
 
     def play_pause():
         """ pauses and plays """
@@ -335,47 +331,42 @@ def video_player():
             vid_player.pause()
             play_pause_btn["text"] = "Play"
 
-
-    def video_ended(event):
+    def video_ended():
         """ handle video ended """
         progress_slider.set(progress_slider["to"])
         play_pause_btn["text"] = "Play"
         progress_slider.set(0)
 
-
-    root = tkinter.Tk()
-    root.title("Video Player")
-
-    load_btn = tkinter.Button(root, text="Load", command=load_video)
+    load_btn = tkinter.Button(page, text="Load", command=load_video)
     load_btn.pack()
 
-    vid_player = TkinterVideo(scaled=True, master=root)
+    vid_player = TkinterVideo(scaled=True, master=page)
     vid_player.pack(expand=True, fill="both")
 
-    play_pause_btn = tkinter.Button(root, text="Play", command=play_pause)
+    play_pause_btn = tkinter.Button(page, text="Play", command=play_pause)
     play_pause_btn.pack()
 
-    skip_plus_5sec = tkinter.Button(root, text="Skip -5 sec", command=lambda: skip(-5))
+    skip_plus_5sec = tkinter.Button(page, text="Skip -5 sec", command=lambda: skip(-5))
     skip_plus_5sec.pack(side="left")
 
-    start_time = tkinter.Label(root, text=str(datetime.timedelta(seconds=0)))
+    start_time = tkinter.Label(page, text=str(datetime.timedelta(seconds=0)))
     start_time.pack(side="left")
 
-    progress_slider = tkinter.Scale(root, from_=0, to=0, orient="horizontal")
-    progress_slider.bind("<ButtonRelease-1>", seek)
+    progress_slider = tkinter.Scale(page, from_=0, to=0, orient="horizontal")
+    progress_slider.bind("<ButtonRelease-1>", lambda e: seek())
     progress_slider.pack(side="left", fill="x", expand=True)
 
-    end_time = tkinter.Label(root, text=str(datetime.timedelta(seconds=0)))
+    end_time = tkinter.Label(page, text=str(datetime.timedelta(seconds=0)))
     end_time.pack(side="left")
 
-    vid_player.bind("<<Duration>>", update_duration)
-    vid_player.bind("<<SecondChanged>>", update_scale)
-    vid_player.bind("<<Ended>>", video_ended )
+    vid_player.bind("<<Duration>>", lambda e: update_duration())
+    vid_player.bind("<<SecondChanged>>", lambda e: update_scale())
+    vid_player.bind("<<Ended>>", lambda e: video_ended())
 
-    skip_plus_5sec = tkinter.Button(root, text="Skip +5 sec", command=lambda: skip(5))
+    skip_plus_5sec = tkinter.Button(page, text="Skip +5 sec", command=lambda: skip(5))
     skip_plus_5sec.pack(side="left")
 
-    root.mainloop()
+    return page
 
 def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     "The browser page for the front end."
