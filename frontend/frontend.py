@@ -164,6 +164,7 @@ class FrontEnd(customtkinter.CTk):
             "Account Page" : Pages.account_page(),
             "New Account Page" : Pages.new_account_page(),
             "History Page" : Pages.history_page(),
+            "Video Player" : Pages.video_player(),
             "Unknown Page" : customtkinter.CTkFrame(
                 corner_radius=0, fg_color=CONST.get_colour("Normal")
             )
