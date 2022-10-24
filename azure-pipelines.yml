@@ -20,9 +20,11 @@ steps:
   displayName: 'Use Python $(python.version)'
 
 - script: |
+    pip install customtkinter
     pip install youtube-search-python
     pip install pillow
-    pip install customtkinter
+    pip install cryptography
+    pip install python-vlc
   displayName: 'Install dependencies'
 
 - script: python azure_test.py

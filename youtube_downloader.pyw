@@ -4,7 +4,7 @@
     #pip install youtube-search-python
     #pip install pillow
     #pip install cryptography
-    #pip install tkvideoplayer
+    #pip install python-vlc
 
 if __name__ == "__main__":
     import frontend.frontend

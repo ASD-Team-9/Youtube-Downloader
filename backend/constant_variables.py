@@ -21,6 +21,10 @@ THREADS: dict[str] = {
     "searching thread": None,
     "browsing thread": None,
     "playlist loading thread": None,
+
+    "video loading thread": None,
+    "video looping thread": None,
+    "volume update thread": None,
 }
 
 #Used for checking if a YouTube URL is valid or not.

@@ -1,21 +1,17 @@
 "Pages for the main frontend class."
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 import tkinter
-from tkinter import filedialog
 import os
 import os.path
 from urllib.request import urlopen
 from io import BytesIO
-import datetime
-
+import vlc
 from PIL import Image, ImageTk
 import customtkinter
 import youtubesearchpython as YouTube
 from cryptography.fernet import Fernet
 
-from tkVideoPlayer import TkinterVideo
 from backend.action_thread import ActionThread
-
 import backend.constant_variables as CONST
 import frontend.frontend as Frontend
 import frontend.color as COLOR
@@ -289,82 +285,88 @@ def video_player_page():
     "Video Player page."
     page = _get_page_template()
 
-    def update_duration():
-        """ updates the duration after finding the duration """
-        duration = vid_player.video_info()["duration"]
-        end_time["text"] = str(datetime.timedelta(seconds=duration))
-        progress_slider["to"] = duration
-
-    def update_scale():
-        """ updates the scale value """
-        progress_slider.set(vid_player.current_duration())
+    def play_media(media):
+        player.set_media(media)
+        player.audio_set_volume(int(audio_slider.get()))
+        video_slider.set(0)
+        player.play()
 
     def load_video():
-        """ loads the video """
-        file_path = filedialog.askopenfilename(filetypes=[
-                       ('Video Files', ["*.mp4"])])
-
+        file_path = filedialog.askopenfilename(filetypes=[('Video Files', ["*.mp4"])])
         if file_path:
-            vid_player.load(file_path)
+            play_media(vlc_instance.media_new(file_path))
 
-            progress_slider.config(to=0, from_=0)
-            play_pause_btn["text"] = "Play"
-            progress_slider.set(0)
-            vid_player.play()
+    def loop():
+        play_media(player.get_media())
 
-    def seek():
-        """ used to seek a specific timeframe """
-        vid_player.seek(int(progress_slider.get()))
+    videopanel = customtkinter.CTkFrame(
+        page,
+        highlightthickness=0,
+        bg=COLOR.get_colour("Normal")
+    )
+    canvas = customtkinter.CTkCanvas(
+        videopanel,
+        highlightthickness=0,
+        bg=COLOR.get_colour("Normal2")
+    )
+    canvas.pack(fill="both", expand=1)
+    videopanel.pack(fill="both", expand=1)
 
-    def skip(value: int):
-        """ skip seconds """
-        vid_player.seek(int(progress_slider.get())+value)
-        progress_slider.set(progress_slider.get() + value)
+    vlc_instance = vlc.Instance()
+    player = vlc_instance.media_player_new()
+    event_manager = player.event_manager()
+    event_manager.event_attach(vlc.EventType.MediaPlayerPositionChanged,
+        lambda *e: video_slider.set(player.get_time() / player.get_length()))
+    event_manager.event_attach(
+        vlc.EventType.MediaPlayerEndReached,
+        lambda *e: ActionThread("video looping thread", loop)
+    )
+    player.set_hwnd(videopanel.winfo_id())
 
-    def play_pause():
-        """ pauses and plays """
-        if vid_player.is_paused():
-            vid_player.play()
-            play_pause_btn["text"] = "Pause"
+    controls = customtkinter.CTkFrame(
+        page,
+        bg=COLOR.get_colour("Dark")
+    )
 
-        else:
-            vid_player.pause()
-            play_pause_btn["text"] = "Play"
+    customtkinter.CTkButton(
+        controls, text="Open",
+        fg_color=COLOR.get_colour("ButtonNormal"),
+        hover_color=COLOR.get_colour("ButtonHover"),
+        command=lambda: ActionThread("video loading thread", load_video)
+    ).pack(side="left", padx=(10, 0))
 
-    def video_ended():
-        """ handle video ended """
-        progress_slider.set(progress_slider["to"])
-        play_pause_btn["text"] = "Play"
-        progress_slider.set(0)
+    customtkinter.CTkButton(
+        controls, text="Play/Pause",
+        fg_color=COLOR.get_colour("ButtonNormal"),
+        hover_color=COLOR.get_colour("ButtonHover"),
+        command=player.pause
+    ).pack(side="left", padx=(10, 0))
 
-    load_btn = tkinter.Button(page, text="Load", command=load_video)
-    load_btn.pack()
+    audio_slider = customtkinter.CTkSlider(
+        controls,
+        from_=0, to=100,
+        command=lambda e: ActionThread(
+            "volume update thread",
+            lambda: player.audio_set_volume(int(audio_slider.get()))
+        ),
+    )
+    audio_slider.set(100)
+    audio_slider.pack(side="right", padx=(0, 10))
 
-    vid_player = TkinterVideo(scaled=True, master=page)
-    vid_player.pack(expand=True, fill="both")
+    controls.pack(side="bottom", fill="both", ipadx=10, ipady=10)
 
-    play_pause_btn = tkinter.Button(page, text="Play", command=play_pause)
-    play_pause_btn.pack()
+    timeline = customtkinter.CTkFrame(
+        page,
+        bg=COLOR.get_colour("Dark")
+    )
+    video_slider = customtkinter.CTkSlider(
+        timeline,
+        from_=0, to=1,
+        command=lambda e: player.set_position(video_slider.get()),
+    )
+    video_slider.pack(fill="x")
 
-    skip_plus_5sec = tkinter.Button(page, text="Skip -5 sec", command=lambda: skip(-5))
-    skip_plus_5sec.pack(side="left")
-
-    start_time = tkinter.Label(page, text=str(datetime.timedelta(seconds=0)))
-    start_time.pack(side="left")
-
-    progress_slider = tkinter.Scale(page, from_=0, to=0, orient="horizontal")
-    progress_slider.bind("<ButtonRelease-1>", lambda e: seek())
-    progress_slider.pack(side="left", fill="x", expand=True)
-
-    end_time = tkinter.Label(page, text=str(datetime.timedelta(seconds=0)))
-    end_time.pack(side="left")
-
-    vid_player.bind("<<Duration>>", lambda e: update_duration())
-    vid_player.bind("<<SecondChanged>>", lambda e: update_scale())
-    vid_player.bind("<<Ended>>", lambda e: video_ended())
-
-    skip_plus_5sec = tkinter.Button(page, text="Skip +5 sec", command=lambda: skip(5))
-    skip_plus_5sec.pack(side="left")
+    timeline.pack(side="bottom", fill="both", ipadx=10, ipady=10)
 
     return page
 
