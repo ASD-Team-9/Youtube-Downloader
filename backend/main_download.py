@@ -26,9 +26,9 @@ class Downloader:
     def get_default_args(self) -> list[str]:
         "Getting the default arguements"
         return [
-        "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
-        "--progress-template",
-        "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
+            "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
+            "--progress-template",
+            "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
         ]
 
     def update_downloader(self) -> None:
@@ -70,7 +70,11 @@ class Downloader:
                             pass
                 if process.returncode != 0:
                     print("ERROR HERE") #TODO: Update failure on queued item
-        download_url = [CONST.YTDLP, video_details["link"]] + self.get_default_args() + Format.update_video_args(format_type, quality_type)
+        download_url = (
+            [CONST.YTDLP, "https://www.youtube.com/watch?v=" + video_details["id"]] +
+            self.get_default_args() +
+            Format.update_video_args(format_type, quality_type)
+        )
         self.queue.append(DownloadItem(video_details["title"], download_url))
         ActionThread("downloading thread", begin_downloading)
 

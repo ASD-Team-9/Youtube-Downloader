@@ -1,7 +1,6 @@
 "The main frontend class"
 import tkinter
 from tkinter import filedialog
-from tkinter import messagebox
 import customtkinter
 import youtubesearchpython as YouTube
 
@@ -196,18 +195,21 @@ class FrontEnd(customtkinter.CTk):
             return YouTube.Video.get(url)
 
         def search_input(query) -> dict:
-            return YouTube.VideosSearch(query, limit = 3).result()["result"] #TODO: Set to 10
+            return YouTube.VideosSearch(query, limit = 30).result()["result"]
 
         next_page = "Unknown Page"
-        if searcher.is_playist_url(user_input): #TODO: Check if playlist first before video
-            print("Detect playist URL")
-        elif searcher.is_video_url(user_input):
-            next_page = "Video Details Page"
-            self.pages[next_page] = Pages.video_details_page(search_url(user_input))
-        else:
+        try:
+            if searcher.is_playist_url(user_input):
+                next_page = "Playlist Page"
+                self.pages[next_page] = Pages.playlist_page(user_input)
+            elif searcher.is_video_url(user_input):
+                next_page = "Video Details Page"
+                self.pages[next_page] = Pages.video_details_page(search_url(user_input))
+            else:
+                raise Exception
+        except Exception:
             next_page = "Browser Page"
             self.pages[next_page] = Pages.browser_page(search_input(user_input))
-
         self.change_page(next_page)
 
     def download(self, video_name, args) -> None:
@@ -222,9 +224,6 @@ def get_image(image_name) -> tkinter.PhotoImage:
 def update_downloader() -> None:
     "Manually updates the downloader."
     CONST.DOWNLOADER.update_downloader()
-
-    #TODO: Remove for another type of feedback.
-    messagebox.showinfo("Update","exe is manually updated!")
 
 def change_download_location() -> None:
     "Changes the download location of the downloader."

@@ -3,22 +3,24 @@ import re
 import platform
 import os
 from pathlib import Path
-from backend.main_download import Downloader
-from backend.action_thread import ActionThread
 
 #The singleton frontend and downloader
 FRONTEND = None
-DOWNLOADER: Downloader = None
+DOWNLOADER = None
+
+#Boolean check to output certain functions onto the console.
 AZURE_TEST = False
 
 #A list to hold all the references of thumbnail images as Python cleans images aggressively.
 THUMBNAILS = []
 
 #Responsible for holding all the threads.
-THREADS: dict[str, ActionThread] = {
+THREADS: dict[str] = {
     "auto update thread": None,
     "downloading thread": None,
     "searching thread": None,
+    "browsing thread": None,
+    "playlist loading thread": None,
 }
 
 #Used for checking if a YouTube URL is valid or not.

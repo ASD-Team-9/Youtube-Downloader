@@ -14,6 +14,7 @@ import youtubesearchpython as YouTube
 from cryptography.fernet import Fernet
 
 from tkVideoPlayer import TkinterVideo
+from backend.action_thread import ActionThread
 
 import backend.constant_variables as CONST
 import frontend.frontend as Frontend
@@ -42,31 +43,13 @@ class Thumbnail:
         if self.thumbnail2 is None:
             self.thumbnail2 = ImageTk.PhotoImage(self.image.resize(size))
 
-class Video:
+class BrowsingVideo:
     "Video class\nNeeded to store necessary information."
 
     def __init__(self, scrollable_frame, video, page_ref) -> None:
         self.page = page_ref
         self.link = video["link"]
-
-        self.frame = customtkinter.CTkFrame(
-            scrollable_frame,
-            fg_color=COLOR.get_colour("Dark")
-        )
-
-        self.thumbnail = CONST.THUMBNAILS[-1]
-        image = customtkinter.CTkLabel(
-            self.frame, image=self.thumbnail.thumbnail,
-        )
-        image.pack(side="left", padx=5)
-        image.bind("<Button-1>", self.go_to_details_page)
-
-        customtkinter.CTkLabel(
-            self.frame, text_color=COLOR.get_colour("Text"),
-            text=f"{max_string(video['title'], 70)}\nDuration: {video['duration']}",
-            width=CONST.FRONTEND.width*2/3-250, #To hold the width otherwise pack will shrink it
-            justify="left", anchor="w"
-        ).pack(side="top", anchor="nw", pady=5)
+        self.frame, self.thumbnail = _create_video_item(scrollable_frame, video)
 
         customtkinter.CTkButton(
             self.frame, command=self.go_to_details_page,
@@ -76,8 +59,6 @@ class Video:
             text_color=COLOR.get_colour("Text"),
         ).pack(side="bottom", anchor="sw", pady=5)
 
-        self.frame.pack(side="top", pady=2.5, ipady=5, ipadx=5, padx=5)
-
     def go_to_details_page(self):
         "Switches to video details page with the corresponding link"
         CONST.FRONTEND.pages["Video Details Page"] = video_details_page(
@@ -85,11 +66,77 @@ class Video:
         )
         CONST.FRONTEND.change_page("Video Details Page")
 
+class PlaylistVideo:
+    "A playlist video for the playlist page"
+    def __init__(self, scrollable_frame, video) -> None:
+        self.video = video
+        self.frame, self.thumbnail = _create_video_item(scrollable_frame, video)
+
+        self.checkbox = customtkinter.CTkCheckBox(
+            self.frame,
+            text="Download this video",
+            text_color=COLOR.get_colour("Text"),
+        )
+        self.checkbox.select()
+        self.checkbox.pack(side="bottom", anchor="sw", pady=5)
+
+    def is_checked(self):
+        "Returns true if the checkbox is checked"
+        return self.checkbox.get()
+
 def _get_page_template() -> customtkinter.CTkFrame:
     "Returns an empty template of the page."
     return customtkinter.CTkFrame(
         CONST.FRONTEND.right_frame, corner_radius=0, fg_color=COLOR.get_colour("Normal")
     )
+
+def _create_video_item(scrollable_frame, video) -> customtkinter.CTkFrame:
+    frame = customtkinter.CTkFrame(
+        scrollable_frame,
+        fg_color=COLOR.get_colour("Dark")
+    )
+
+    thumbnail = Thumbnail(video["thumbnails"][-1]['url'], (200, 100))
+    customtkinter.CTkLabel(
+        frame, image=thumbnail.thumbnail,
+    ).pack(side="left", padx=5)
+
+    customtkinter.CTkLabel(
+        frame, text_color=COLOR.get_colour("Text"),
+        text=f"{max_string(video['title'], 70)}\nDuration: {video['duration']}",
+        width=CONST.FRONTEND.width*2/3-250, #To hold the width otherwise pack will shrink it
+        justify="left", anchor="w"
+    ).pack(side="top", anchor="nw", pady=5)
+    frame.pack(side="top", pady=2.5, ipady=5, ipadx=5, padx=5)
+    return frame, thumbnail
+
+def _get_scrollable_frame(page: customtkinter.CTkFrame) -> tkinter.Frame:
+    canvas = tkinter.Canvas(
+        page, highlightthickness=0,
+        bg=COLOR.get_colour("Normal2")
+    )
+
+    scrollbar = customtkinter.CTkScrollbar(
+        page,
+        fg_color=COLOR.get_colour("Normal2"),
+        command=canvas.yview
+    )
+    scrollbar.pack(side="right", fill="y", padx=(0, 3))
+
+    scrollable_frame = tkinter.Frame(canvas, bg=COLOR.get_colour("Normal"))
+    scrollable_frame.bind(
+        "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    scrollable_frame.pack(expand=True, fill="both")
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind_all(
+        "<MouseWheel>",
+        lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    )
+    canvas.pack(expand=True, fill="both")
+    return scrollable_frame
 
 def settings_page() -> customtkinter.CTkFrame:
     "The settings page for the frontend."
@@ -181,7 +228,7 @@ def account_page() -> customtkinter.CTkFrame:
     login_button.pack(side="top",anchor="nw", padx=10)
 
     create_account_button = customtkinter.CTkButton(
-        page, text="Create Account",command=lambda: 
+        page, text="Create Account",command=lambda:
         CONST.FRONTEND.change_page("New Account Page"),
         fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
@@ -209,7 +256,8 @@ def new_account_page() -> customtkinter.CTkFrame:
         with open("resources/encryptedLogins.txt","rb+") as file:
             decrypted_data = fernet.decrypt(file.read()).decode()
             decrypted_data += f"\n{username}|{password}"
-            print(decrypted_data)
+            if CONST.AZURE_TEST:
+                print(decrypted_data)
 
         with open("resources/encryptedLogins.txt","wb") as file:
             file.write(fernet.encrypt(decrypted_data.encode()))
@@ -333,42 +381,69 @@ def video_player() -> customtkinter.CTkFrame:
 def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     "The browser page for the front end."
     page = _get_page_template()
+    scrollable_frame = _get_scrollable_frame(page)
 
-    canvas = tkinter.Canvas(
-        page, highlightthickness=0,
-        bg=COLOR.get_colour("Normal2")
+    #Load videos ascynchronously.
+    def load_videos():
+        for video in search_results:
+            BrowsingVideo(scrollable_frame, video, page)
+            if CONST.FRONTEND.current_page != page:
+                return
+    ActionThread("browsing thread", load_videos, force_new=True)
+    return page
+
+def playlist_page(link: str) -> customtkinter.CTkFrame:
+    "The playlist page for the frontend."
+    page = _get_page_template()
+
+    playlist_videos = []
+    download_frame = customtkinter.CTkFrame(page)
+    download_options_menu, quality_options_menu, button = _get_download_options(
+        download_frame,
+        lambda: quality_options_menu.pack(side="left", padx=10, pady=10)
     )
 
-    scrollbar = customtkinter.CTkScrollbar(
-        page,
-        fg_color=COLOR.get_colour("Normal2"),
-        command=canvas.yview
-    )
-    scrollbar.pack(side="right", fill="y", padx=(0, 3))
+    def batch_download():
+        for playlist_video in playlist_videos:
+            if playlist_video.is_checked():
+                CONST.DOWNLOADER.download(
+                    playlist_video.video,
+                    download_options_menu.variable.get(),
+                    quality_options_menu.variable.get()
+                )
+    button.command = batch_download
+    button.pack(side="left", fill="x")
+    download_options_menu.pack(side="left", padx=10, pady=10)
+    quality_options_menu.pack(side="left", padx=10, pady=10)
+    download_frame.pack(side="bottom", fill="x", padx=10, pady=10)
 
-    scrollable_frame = tkinter.Frame(canvas, bg=COLOR.get_colour("Normal"))
-    scrollable_frame.bind(
-        "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-    )
-    scrollable_frame.pack(expand=True, fill="both")
+    scrollable_frame = _get_scrollable_frame(page)
+    def load_videos():
+        #Get all videos in the playlist.
+        while True:
+            try: #Try is needed as sometimes the module errors out.
+                playlist = YouTube.Playlist(link)
+                while playlist.hasMoreVideos:
+                    playlist.getNextVideos()
+                break
+            except KeyError:
+                pass
+        for video in playlist.videos:
+            playlist_videos.append(PlaylistVideo(scrollable_frame, video))
 
-    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-    canvas.bind_all(
-        "<MouseWheel>",
-        lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-    )
-    canvas.pack(expand=True, fill="both")
-
-    for video in search_results:
-        Thumbnail(video["thumbnails"][-1]['url'], (200, 100))
-        Video(scrollable_frame, video, page)
+    def errored():
+        next_page = "Browser Page"
+        CONST.FRONTEND.pages[next_page] = browser_page(
+            YouTube.VideosSearch(link, limit = 30).result()["result"]
+        )
+        CONST.FRONTEND.change_page(next_page)
+    ActionThread("playlist loading thread", load_videos, errored, True)
 
     return page
 
 def video_details_page(
         video_details: dict,
-        video: Video = None
+        video: BrowsingVideo = None
     ) -> customtkinter.CTkFrame:
     "The video details page for the front end."
 
@@ -377,8 +452,9 @@ def video_details_page(
     top_bar = customtkinter.CTkFrame(
         page, fg_color=COLOR.get_colour("Dark")
     )
-    top_bar.pack(fill="x", expand=True, side="top", padx=10, ipady=10)
+    top_bar.pack(fill="x", side="top", anchor="n", padx=10, ipady=10, pady=10)
 
+    #If there was a video given from the browser page, read it
     if video is not None:
         CONST.FRONTEND.pages["Browser Page"] = video.page
         customtkinter.CTkButton(
@@ -405,8 +481,32 @@ def video_details_page(
     thumbnail = customtkinter.CTkLabel(
         page, image=nail, text_color=COLOR.get_colour("Text")
     )
-    thumbnail.pack(side="top")
+    thumbnail.pack(side="top", anchor="n")
 
+    download_options_menu, quality_options_menu, button = _get_download_options(
+        page,
+        lambda: quality_options_menu.pack(side="top", anchor="n", padx=10, pady=10)
+    )
+    button.command = lambda: CONST.DOWNLOADER.download(
+        video_details,
+        download_options_menu.variable.get(),
+        quality_options_menu.variable.get()
+    )
+    download_options_menu.pack(side="top", anchor="n", pady=(10,0))
+    quality_options_menu.pack(side="top",  anchor="n", pady=(10,0))
+    button.pack(side="bottom", anchor="s", fill="x", padx=10, ipady=10, pady=(0,10))
+
+    return page
+
+def max_string(string: str, max_char: int):
+    "Returns the given string limited to the max character specified"
+    return string[:max_char] + ("" if len(string) <= max_char else "...")
+
+def _get_download_options(page, repack_option) -> list[
+    customtkinter.CTkOptionMenu,
+    customtkinter.CTkOptionMenu,
+    customtkinter.CTkButton]:
+    "Add an download form options menu, quality options menu and download button to a given page"
     # Download Type Dropdown
     download_option = customtkinter.StringVar()
     download_options_menu = customtkinter.CTkOptionMenu(
@@ -415,17 +515,16 @@ def video_details_page(
         text_color=COLOR.get_colour("Text")
     )
     download_options_menu.set('mp4')
-    download_options_menu.pack(side="top", padx=10, pady=10)
 
-    def on_download_option_changed(*args):
+    def on_download_option_changed():
         # Best video/audio doesn't need quality options
         # Hide it when best _ is selected
         match download_option.get():
             case 'Best Video' | 'Best Audio':
                 quality_options_menu.pack_forget()
             case _:
-                quality_options_menu.pack(side="top", padx=10, pady=10)
-    download_option.trace_variable('w', on_download_option_changed)
+                repack_option()
+    download_option.trace_variable('w', lambda *e: on_download_option_changed())
 
     # Quality Dropdown Options
     quality_option = customtkinter.StringVar()
@@ -435,25 +534,14 @@ def video_details_page(
         text_color=COLOR.get_colour("Text")
     )
     quality_options_menu.set('Highest')
-    quality_options_menu.pack(side="top", padx=10, pady=10)
 
-    def download() -> None:
-        CONST.DOWNLOADER.download(
-            video_details,format_type = download_option.get(), quality_type = quality_option.get()
-        )
-
-    image = Frontend.get_image("Download.png")
-    customtkinter.CTkButton(
+    image = Frontend.get_image("Download.png").subsample(2)
+    button = customtkinter.CTkButton(
         page, text="Download", image=image, compound="top",
-        width=image.width() + 10, height=image.height() + 10,
+        width=image.width() + 10, height=image.height(),
         fg_color=COLOR.get_colour("ButtonHover"),
         hover_color=COLOR.get_colour("ButtonHover2"),
-        text_color=COLOR.get_colour("Text"),
-        command=download
-    ).pack(side="bottom", anchor="s", fill=customtkinter.X)
+        text_color=COLOR.get_colour("Text")
+    )
 
-    return page
-
-def max_string(string: str, max_char: int):
-    "Returns the given string limited to the max character specified"
-    return string[:max_char] + ("" if len(string) <= max_char else "...")
+    return download_options_menu, quality_options_menu, button
