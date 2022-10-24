@@ -288,6 +288,10 @@ def video_player_page():
     "Video Player page."
     page = _get_page_template()
 
+    if CONST.AZURE_TEST:
+        print("Video player unavailable in Azure pipeline test")
+        return
+
     def play_media(media):
         player.set_media(media)
         player.audio_set_volume(int(audio_slider.get()))

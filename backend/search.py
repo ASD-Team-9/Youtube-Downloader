@@ -8,9 +8,3 @@ def is_video_url(string: str) -> bool:
 def is_playist_url(string: str) -> bool:
     "Checks if given string is a YouTube playlist"
     return "list" in string and is_video_url(string)
-
-def getVideoInfo(url):
-    print("Get Video Info")
-
-def getPlayistInfo(url):
-    print("Get playist info")
