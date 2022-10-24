@@ -1,13 +1,81 @@
 "Pages for the main frontend class."
-from tkinter import Tk, messagebox
+from tkinter import messagebox
+import tkinter
 from urllib.request import urlopen
 from io import BytesIO
-
 from PIL import Image, ImageTk
 import customtkinter
+import youtubesearchpython as YouTube
 
 import backend.constant_variables as CONST
 import frontend.frontend as Frontend
+import frontend.color as COLOR
+
+class Thumbnail:
+    """
+    Thumbnail class\n
+    Needed to prevent Python garbage collection from removing images loaded from net.
+    """
+    def __init__(self, url, size = (0, 0)) -> None:
+        self.thumbnail2 = None
+        try:
+            with urlopen(url) as raw_data:
+                self.image = Image.open(BytesIO(raw_data.read()))
+                self.thumbnail = ImageTk.PhotoImage(
+                    self.image.resize(size) if size != (0, 0) else self.image
+                )
+            CONST.THUMBNAILS.append(self)
+            self.index = len(CONST.THUMBNAILS) - 1
+        except Exception:
+            pass
+
+    def secondary_size(self, size):
+        "Create a second size for the thumbnail."
+        if self.thumbnail2 is None:
+            self.thumbnail2 = ImageTk.PhotoImage(self.image.resize(size))
+
+class Video:
+    "Video class\nNeeded to store necessary information."
+
+    def __init__(self, scrollable_frame, video, page_ref) -> None:
+        self.page = page_ref
+        self.link = video["link"]
+
+        self.frame = customtkinter.CTkFrame(
+            scrollable_frame,
+            fg_color=COLOR.get_colour("Dark")
+        )
+
+        self.thumbnail = CONST.THUMBNAILS[-1]
+        image = customtkinter.CTkLabel(
+            self.frame, image=self.thumbnail.thumbnail,
+        )
+        image.pack(side="left", padx=5)
+        image.bind("<Button-1>", self.go_to_details_page)
+
+        customtkinter.CTkLabel(
+            self.frame, text_color=COLOR.get_colour("Text"),
+            text=f"{max_string(video['title'], 70)}\nDuration: {video['duration']}",
+            width=CONST.FRONTEND.width*2/3-250, #To hold the width otherwise pack will shrink it
+            justify="left", anchor="w"
+        ).pack(side="top", anchor="nw", pady=5)
+
+        customtkinter.CTkButton(
+            self.frame, command=self.go_to_details_page,
+            text="Download",
+            fg_color=COLOR.get_colour("ButtonNormal"),
+            hover_color=COLOR.get_colour("ButtonHover"),
+            text_color=COLOR.get_colour("Text"),
+        ).pack(side="bottom", anchor="sw", pady=5)
+
+        self.frame.pack(side="top", pady=2.5, ipady=5, ipadx=5, padx=5)
+
+    def go_to_details_page(self):
+        "Switches to video details page with the corresponding link"
+        CONST.FRONTEND.pages["Video Details Page"] = video_details_page(
+            YouTube.Video.get(self.link), self,
+        )
+        CONST.FRONTEND.change_page("Video Details Page")
 
 import datetime
 import tkinter as tk
@@ -19,29 +87,38 @@ from tkVideoPlayer import TkinterVideo
 def _get_page_template() -> customtkinter.CTkFrame:
     "Returns an empty template of the page."
     return customtkinter.CTkFrame(
-        CONST.FRONTEND.right_frame, corner_radius=0, fg_color=CONST.get_colour("Normal")
+        CONST.FRONTEND.right_frame, corner_radius=0, fg_color=COLOR.get_colour("Normal")
     )
 
 def settings_page() -> customtkinter.CTkFrame:
     "The settings page for the frontend."
     page = _get_page_template()
-    autoupdate = customtkinter.CTkCheckBox(page, text="Enable Auto Update")
-    autoupdate.pack(anchor="nw", padx=10, pady=20)
-    autoupdate.select() #TODO: Make this dynamic with login
+
+    CONST.FRONTEND.autoupdate = customtkinter.CTkCheckBox(
+        page, text="Enable Auto Update",
+        text_color=COLOR.get_colour("Text"),
+        command=Frontend.switch_autodownload)
+    CONST.FRONTEND.autoupdate.pack(anchor="nw", padx=10, pady=20)
+
+    with open("resources/update.txt", "r", encoding="utf-8") as file:
+            if file.readline() == "enabled":
+                CONST.FRONTEND.autoupdate.select()
 
     updatebutton = customtkinter.CTkButton(
         page, text="Update", command=Frontend.update_downloader,
-        fg_color=CONST.get_colour("ButtonNormal")
+        fg_color=COLOR.get_colour("ButtonNormal"),
+        text_color=COLOR.get_colour("Text")
     )
     updatebutton.pack(anchor="nw", padx=20, pady=20)
 
     change_location = customtkinter.CTkButton(
         page, text="Change Download Location",
-        command = Frontend.change_download_location, fg_color=CONST.get_colour("ButtonNormal")
+        command = Frontend.change_download_location,
+        fg_color = COLOR.get_colour("ButtonNormal"), text_color=COLOR.get_colour("Text")
     )
     change_location.pack(anchor="nw", padx=20, pady=20)
 
-    colour_choice_label = customtkinter.CTkLabel(page, text="Choose Colour Scheme:")
+    colour_choice_label = customtkinter.CTkLabel(page, text="Choose Colour Scheme:", text_color=COLOR.get_colour("Text"))
     colour_choice_label.pack(anchor="nw", padx=20, pady=20)
 
     colour_choice = customtkinter.CTkOptionMenu(
@@ -94,21 +171,21 @@ def account_page() -> customtkinter.CTkFrame:
     password.bind("<Return>", login)
 
     login_button = customtkinter.CTkButton(
-        page, text="Login", command=login,
-        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+        page, text="Login", command=login, text_color=COLOR.get_colour("Text"),
+        fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     login_button.pack(side="top",anchor="nw", padx=10)
 
     create_account_button = customtkinter.CTkButton(
         page, text="Create Account",command=lambda: 
         CONST.FRONTEND.change_page("New Account Page"),
-        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+        fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     create_account_button.pack(side="top",anchor="nw", padx=10)
     
     video_player_button = customtkinter.CTkButton(
         page, text="Video Player", command=video_player,
-        fg_color=CONST.get_colour("ButtonNormal"), hover_color=CONST.get_colour("ButtonHover")
+        fg_color=COLOR.get_colour("ButtonNormal"), hover_color=COLOR.get_colour("ButtonHover")
     )
     video_player_button.pack(side="top",anchor="nw", padx=10)
 
@@ -140,8 +217,8 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     create_button = customtkinter.CTkButton(
         page, text="Create Account", command=register,
-        fg_color=CONST.get_colour("ButtonNormal"),
-        hover_color=CONST.get_colour("ButtonHover")
+        fg_color=COLOR.get_colour("ButtonNormal"),
+        hover_color=COLOR.get_colour("ButtonHover")
     )
     create_button.pack(side="top",anchor="nw", padx=10)
 
@@ -244,96 +321,126 @@ def browser_page(search_results: dict) -> customtkinter.CTkFrame:
     "The browser page for the front end."
     page = _get_page_template()
 
+    canvas = tkinter.Canvas(
+        page, highlightthickness=0,
+        bg=COLOR.get_colour("Normal2")
+    )
+
+    scrollbar = customtkinter.CTkScrollbar(
+        page,
+        fg_color=COLOR.get_colour("Normal2"),
+        command=canvas.yview
+    )
+    scrollbar.pack(side="right", fill="y", padx=(0, 3))
+
+    scrollable_frame = tkinter.Frame(canvas, bg=COLOR.get_colour("Normal"))
+    scrollable_frame.bind(
+        "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    scrollable_frame.pack(expand=True, fill="both")
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind_all(
+        "<MouseWheel>",
+        lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    )
+    canvas.pack(expand=True, fill="both")
+
     for video in search_results:
-        for key in ["title", "duration", "thumbnails", "link"]:
-            title = customtkinter.CTkLabel(
-                page, text=f"{key}: {video[key]}", fg_color=CONST.get_colour("Text")
-            )
-            title.pack(anchor="nw", padx=10, pady=10)
+        Thumbnail(video["thumbnails"][-1]['url'], (200, 100))
+        Video(scrollable_frame, video, page)
+
     return page
 
-#TODO: came_from_browser_page implementation
-def video_details_page(came_from_browser_page: bool, video_details: dict) -> customtkinter.CTkFrame:
+def video_details_page(
+        video_details: dict,
+        video: Video = None
+    ) -> customtkinter.CTkFrame:
     "The video details page for the front end."
-    def download() -> None:
-        CONST.FRONTEND.download(
-            video_details["title"], [CONST.YTDLP, video_details["link"]] + update_video_args()
-        )
 
     page = _get_page_template()
 
-    customtkinter.CTkLabel(
-        page, text=video_details["title"], fg_color="#321321"
-    ).pack(anchor="nw", padx=10, pady=10)
+    top_bar = customtkinter.CTkFrame(
+        page, fg_color=COLOR.get_colour("Dark")
+    )
+    top_bar.pack(fill="x", expand=True, side="top", padx=10, ipady=10)
 
-    Thumbnail(video_details["thumbnails"][-1]["url"])
-    thumbnail = customtkinter.CTkLabel(page, image=CONST.THUMBNAILS[0].thumbnail)
-    thumbnail.pack(anchor="nw", side="top")
+    if video is not None:
+        CONST.FRONTEND.pages["Browser Page"] = video.page
+        customtkinter.CTkButton(
+            top_bar, command=lambda: CONST.FRONTEND.change_page("Browser Page"),
+            text="Back",
+            fg_color=COLOR.get_colour("ButtonNormal"),
+            hover_color=COLOR.get_colour("ButtonHover"),
+            text_color=COLOR.get_colour("Text"),
+        ).pack(side="left", padx=(5, 0))
+
+    customtkinter.CTkLabel(
+        top_bar, text=max_string(video_details["title"], 60),
+        text_color=COLOR.get_colour("Text"),
+        text_font=('Helvetica bold', 15)
+    ).pack(side="left", padx=(5, 0))
+
+    if video is None:
+        Thumbnail(video_details["thumbnails"][-1]["url"], (640, 480))
+        nail = CONST.THUMBNAILS[-1].thumbnail
+    else:
+        video.thumbnail.secondary_size((640, 480))
+        nail = CONST.THUMBNAILS[video.thumbnail.index].thumbnail2
+
+    thumbnail = customtkinter.CTkLabel(
+        page, image=nail, text_color=COLOR.get_colour("Text")
+    )
+    thumbnail.pack(side="top")
 
     # Download Type Dropdown
     download_option = customtkinter.StringVar()
     download_options_menu = customtkinter.CTkOptionMenu(
         page, variable=download_option,
-        values=['mp4', 'm4a', 'mp3'],
+        values=['Best Video', 'Best Audio', 'mp4', 'mp3'],
+        text_color=COLOR.get_colour("Text")
     )
     download_options_menu.set('mp4')
-    download_options_menu.pack(anchor="nw", padx=10, pady=10)
+    download_options_menu.pack(side="top", padx=10, pady=10)
+
+    def on_download_option_changed(*args):
+        # Best video/audio doesn't need quality options
+        # Hide it when best _ is selected
+        match download_option.get():
+            case 'Best Video' | 'Best Audio':
+                quality_options_menu.pack_forget()
+            case _:
+                quality_options_menu.pack(side="top", padx=10, pady=10)
+    download_option.trace_variable('w', on_download_option_changed)
 
     # Quality Dropdown Options
     quality_option = customtkinter.StringVar()
     quality_options_menu = customtkinter.CTkOptionMenu(
         page, variable=quality_option,
-        values=['highest', 'medium', 'low', 'lowest'],
+        values=['Highest', 'Normal', 'Lowest'],
+        text_color=COLOR.get_colour("Text")
     )
-    quality_options_menu.set('highest')
-    quality_options_menu.pack(anchor="nw", padx=10, pady=10)
+    quality_options_menu.set('Highest')
+    quality_options_menu.pack(side="top", padx=10, pady=10)
 
-    # Process args for YT-DLP
-    def update_video_args() -> None:
-        defaualt_args = [
-            "-o", f"{CONST.DOWNLOAD_PATH}/%(title)s.%(ext)s",
-            "--progress-template",
-            "%(progress._percent_str)s %(progress._eta_str)s %(progress._speed_str)s"
-        ]
-
-        args = ["-f"]
-        match download_option.get():
-            case "mp4":
-                match quality_option.get():
-                    case "highest":
-                        args.append("-bestvideo")
-                    case "medium":
-                        args.append("136")
-                    case "low":
-                        args.append("135")
-                    case "lowest":
-                        args.append("160")
-            case "m4a":
-                args.append("140" if quality_option.get() == "highest" else "139")
-            case "mp3":
-                #TODO get mp3 with ffmpeg
-                pass
-        return defaualt_args + args
+    def download() -> None:
+        CONST.DOWNLOADER.download(
+            video_details,format_type = download_option.get(), quality_type = quality_option.get()
+        )
 
     image = Frontend.get_image("Download.png")
     customtkinter.CTkButton(
         page, text="Download", image=image, compound="top",
         width=image.width() + 10, height=image.height() + 10,
-        fg_color=CONST.get_colour("ButtonHover"), hover_color=CONST.get_colour("ButtonHover2"),
+        fg_color=COLOR.get_colour("ButtonHover"),
+        hover_color=COLOR.get_colour("ButtonHover2"),
+        text_color=COLOR.get_colour("Text"),
         command=download
-    ).pack(side="top", anchor="s", fill=customtkinter.X)
+    ).pack(side="bottom", anchor="s", fill=customtkinter.X)
 
     return page
 
-class Thumbnail:
-    """
-    Thumbnail class\n
-    Needed to prevent Python garbage collection from removing images loaded from net.
-    """
-    def __init__(self, url) -> None:
-        try:
-            with urlopen(url) as raw_data:
-                self.thumbnail = ImageTk.PhotoImage(Image.open(BytesIO(raw_data.read())))
-            CONST.THUMBNAILS.append(self)
-        except Exception:
-            pass
+def max_string(string: str, max_char: int):
+    "Returns the given string limited to the max character specified"
+    return string[:max_char] + ("" if len(string) <= max_char else "...")
