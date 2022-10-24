@@ -24,7 +24,7 @@ def pipeline_test():
 
         print("Downloading a video...")
         url = "https://www.youtube.com/watch?v=_oRxHF8GiUE"
-        CONST.FRONTEND.download("Lullaby 「Frozen Starfall」", [CONST.YTDLP, url])
+        CONST.DOWNLOADER.download({"id": url, "title": "Lullaby 「Frozen Starfall」"}, "Best Audio", "Highest")
 
     while CONST.FRONTEND is None:
         sleep(1)
