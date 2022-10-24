@@ -6,6 +6,10 @@ from io import BytesIO
 from PIL import Image, ImageTk
 import customtkinter
 import youtubesearchpython as YouTube
+import os
+import os.path
+from os import path
+from cryptography.fernet import Fernet
 
 import backend.constant_variables as CONST
 import frontend.frontend as Frontend
@@ -94,11 +98,11 @@ def settings_page() -> customtkinter.CTkFrame:
     "The settings page for the frontend."
     page = _get_page_template()
 
-    CONST.FRONTEND.autoupdate = customtkinter.CTkCheckBox(
+    """CONST.FRONTEND.autoupdate = customtkinter.CTkCheckBox(
         page, text="Enable Auto Update",
         text_color=COLOR.get_colour("Text"),
-        command=Frontend.switch_autodownload)
-    CONST.FRONTEND.autoupdate.pack(anchor="nw", padx=10, pady=20)
+        command=Frontend.switch_auto(download)
+    CONST.FRONTEND.autoupdate.pack(anchor="nw", padx=10, pady=20))"""
 
     with open("resources/update.txt", "r", encoding="utf-8") as file:
             if file.readline() == "enabled":
@@ -144,6 +148,26 @@ def account_page() -> customtkinter.CTkFrame:
         while True:
             usernameInput = username.get()
             passwordInput = password.get()
+            if (path.exists("resources/encryptedLogins.txt")):
+                # Reading the key from file
+                key = ''
+                with open('secretLoginKey.key','rb') as file:
+                    key = file.read()
+
+                # Reading the encrypted data from file
+                encryptedData = ''
+                with open ("resources/encryptedLogins.txt","rb") as file:
+                    encryptedData = file.read()
+
+                # Decreypt the data
+                f = Fernet(key)
+
+                decryptedData = f.decrypt(encryptedData)
+
+                with open("resources/logins.txt","wb") as file:
+                    file.write(decryptedData)
+                    file.close()
+
             with open("resources/logins.txt", "r", encoding="utf-8") as accounts_file:
                 for line in accounts_file:
                     usernameLogin, passwordLogin = line.replace("\n","").split("|")
@@ -152,6 +176,10 @@ def account_page() -> customtkinter.CTkFrame:
                         #TODO: Remove this and just log in, hook this up to a new page.
                         CONST.FRONTEND.change_page("History Page")
                         break
+                    if os.path.exists("resources/logins.txt"):
+                        os.remove("resources/logins.txt")
+                    else:
+                        messagebox.showinfo("Error","File not found")
                 else:
                     messagebox.showinfo("Login","Login unsuccessful try again")
                     break
@@ -196,9 +224,80 @@ def new_account_page() -> customtkinter.CTkFrame:
     def register():
         username = new_username.get()
         password = new_password.get()
-        with open("resources/logins.txt","a", encoding="utf-8") as file:
-            file.write('\n'+ username + '|' + password)
-            file.close()
+        if (path.exists("resources/encryptedLogins.txt")):
+            # Reading the key from file
+            key = ''
+            with open('secretLoginKey.key','rb') as file:
+                key = file.read()
+
+            # Reading the encrypted data from file
+            encryptedData = ''
+            with open ("resources/encryptedLogins.txt","rb") as file:
+                encryptedData = file.read()
+
+            # Decreypt the data
+            f = Fernet(key)
+
+            decryptedData = f.decrypt(encryptedData)
+            with open("resources/logins.txt","wb") as file:
+                file.write(decryptedData)
+                file.close()
+
+            with open("resources/logins.txt","a") as file:
+                file.write('\n'+ username + '|' + password)
+                file.close()
+
+            key = ''
+            with open('secretLoginKey.key','rb') as file:
+                key = file.read()
+
+            # reading data from file
+            data = ''
+            with open ("resources/logins.txt","rb") as file:
+                data = file.read()
+
+            # encrypting the data
+            f = Fernet(key)
+
+            encryptedData = f.encrypt(data)
+
+            # saving the encrypted data into a file
+            with open('resources/encryptedLogins.txt', 'wb') as file:
+                file.write(encryptedData)
+                file.close()
+                if os.path.exists("resources/logins.txt"):
+                    os.remove("resources/logins.txt")
+                else:
+                    messagebox.showinfo("Error","File not found")
+
+        else:
+            with open("resources/logins.txt","w", encoding="utf-8") as file:
+                file.write(username + '|' + password)
+                file.close()
+
+            key = ''
+            with open('secretLoginKey.key','rb') as file:
+                key = file.read()
+
+            # reading data from file
+            data = ''
+            with open ("resources/logins.txt","rb") as file:
+                data = file.read()
+
+            # encrypting the data
+            f = Fernet(key)
+
+            encryptedData = f.encrypt(data)
+
+            # saving the encrypted data into a file
+            with open('resources/encryptedLogins.txt', 'wb') as file:
+                file.write(encryptedData)
+                file.close()
+                if os.path.exists("resources/logins.txt"):
+                    os.remove("resources/logins.txt")
+                else:
+                    messagebox.showinfo("Error","File not found")
+
         messagebox.showinfo("Create New Account","Account Created!")
         CONST.FRONTEND.change_page("Account Page")
 
