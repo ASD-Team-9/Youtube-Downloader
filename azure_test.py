@@ -8,7 +8,14 @@ def pipeline_test():
     "The main pipeline test"
     def johnny_test():
         print("Doing Johnny's Test...")
-        url = "https://www.youtube.com/watch?v=qIQ3xNqkVC4"
+        video_id = "_oRxHF8GiUE"
+        title = "Lullaby 「Frozen Starfall」"
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "Best Video", "Highest")
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "Best Audio", "Highest")
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "mp4", "Highest")
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "mp4", "Normal")
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "mp4", "Lowest")
+        CONST.DOWNLOADER.download({"id": video_id, "title": title}, "mp3", "Highest")
 
     def leo_test():
         print("Doing Leo's Test...")
