@@ -1,4 +1,5 @@
 "Pages for the main frontend class."
+from ast import Pass
 from tkinter import filedialog, messagebox
 import tkinter
 import os
@@ -203,9 +204,13 @@ def account_page() -> customtkinter.CTkFrame:
             for line in decrypted_data.split("\n"):
                 details = line.split("|")
                 if details[0] == username.get() and details[1] == password.get():
+                    if CONST.AZURE_TEST:
+                        print("Successful Login")
                     CONST.FRONTEND.change_page("History Page")
                     return
             messagebox.showinfo("Login","Login unsuccessful try again")
+            if CONST.AZURE_TEST:
+                print("Unsuccessful Login")
 
     page = _get_page_template()
 
@@ -239,14 +244,17 @@ def account_page() -> customtkinter.CTkFrame:
     )
     video_player_button.pack(side="top",anchor="nw", padx=10)
 
+    if CONST.AZURE_TEST:
+        print("Leo's test - Logging into an account with the following details:\nusername: testcase1\npassword: testcase2")
+        username.set("testcase1")
+        password.set("testcase2")
+        login()
+
     return page
 
 def new_account_page() -> customtkinter.CTkFrame:
     "The new account page for the frontend."
     def register():
-        username = new_username.get()
-        password = new_password.get()
-
         # Read the key from file
         with open('resources/secretLoginKey.key','rb') as file:
             fernet = Fernet(file.read())
@@ -254,9 +262,9 @@ def new_account_page() -> customtkinter.CTkFrame:
         # Read the encrypted data from file
         with open("resources/encryptedLogins.txt","rb+") as file:
             decrypted_data = fernet.decrypt(file.read()).decode()
-            decrypted_data += f"\n{username}|{password}"
+            decrypted_data += f"\n{new_username.get()}|{new_password.get()}"
             if CONST.AZURE_TEST:
-                print(decrypted_data)
+                print(f"All logins:\n{decrypted_data}")
 
         with open("resources/encryptedLogins.txt","wb") as file:
             file.write(fernet.encrypt(decrypted_data.encode()))
@@ -281,6 +289,12 @@ def new_account_page() -> customtkinter.CTkFrame:
         hover_color=COLOR.get_colour("ButtonHover")
     )
     create_button.pack(side="top",anchor="nw", padx=10)
+
+    if CONST.AZURE_TEST:
+        print("Leo's test - Registering an account with the following details:\nusername: testcase1\npassword: testcase2")
+        new_username.set("testcase1")
+        new_password.set("testcase2")
+        register()
 
     return page
 
