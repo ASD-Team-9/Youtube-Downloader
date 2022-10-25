@@ -25,7 +25,10 @@ steps:
     pip install pillow
     pip install cryptography
     pip install python-vlc
+    pip install pyinstaller
   displayName: 'Install dependencies'
 
 - script: python azure_test.py
   displayName: 'Running azure test'
+
+- script: pyinstaller --onefile youtube_downloader.pyw
