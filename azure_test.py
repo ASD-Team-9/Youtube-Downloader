@@ -12,12 +12,13 @@ def pipeline_test():
 
     def leo_test():
         print("Doing Leo's Test...")
-        
+
     def lewis_test():
         print("Doing Lewis's Test")
 
     def louis_test():
-        print("Doing Louis's Test...")
+        print("Doing Louis's Test - Auto update feature")
+        CONST.DOWNLOADER.update_downloader()
 
     def ryan_test():
         print("Doing Ryan's Test...")
