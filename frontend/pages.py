@@ -206,11 +206,13 @@ def account_page() -> customtkinter.CTkFrame:
                 if details[0] == username.get() and details[1] == password.get():
                     if CONST.AZURE_TEST:
                         print("Successful Login")
-                    CONST.FRONTEND.change_page("History Page")
+                    else:
+                        CONST.FRONTEND.change_page("History Page")
                     return
-            messagebox.showinfo("Login","Login unsuccessful try again")
             if CONST.AZURE_TEST:
                 print("Unsuccessful Login")
+            else:
+                messagebox.showinfo("Login","Login unsuccessful try again")
 
     page = _get_page_template()
 
@@ -245,9 +247,9 @@ def account_page() -> customtkinter.CTkFrame:
     video_player_button.pack(side="top",anchor="nw", padx=10)
 
     if CONST.AZURE_TEST:
-        print("Leo's test - Logging into an account with the following details:\nusername: testcase1\npassword: testcase2")
-        username.set("testcase1")
-        password.set("testcase2")
+        print("""Leo's test - Logging into an account with the following details:\nusername: testcase1\npassword: testcase2""")
+        username.insert(0, "testcase1")
+        password.insert(0, "testcase2")
         login()
 
     return page
@@ -268,7 +270,9 @@ def new_account_page() -> customtkinter.CTkFrame:
 
         with open("resources/encryptedLogins.txt","wb") as file:
             file.write(fernet.encrypt(decrypted_data.encode()))
-        CONST.FRONTEND.change_page("Account Page")
+
+        if not CONST.AZURE_TEST:
+            CONST.FRONTEND.change_page("Account Page")
 
     page = _get_page_template()
 
@@ -292,8 +296,8 @@ def new_account_page() -> customtkinter.CTkFrame:
 
     if CONST.AZURE_TEST:
         print("Leo's test - Registering an account with the following details:\nusername: testcase1\npassword: testcase2")
-        new_username.set("testcase1")
-        new_password.set("testcase2")
+        new_username.insert(0, "testcase1")
+        new_password.insert(0, "testcase2")
         register()
 
     return page
