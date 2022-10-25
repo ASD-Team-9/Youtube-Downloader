@@ -528,7 +528,7 @@ def _get_download_options(page, repack_option) -> list[
     download_option = customtkinter.StringVar()
     download_options_menu = customtkinter.CTkOptionMenu(
         page, variable=download_option,
-        values=['Best Video', 'Best Audio', 'mp4', 'mp3'],
+        values=['Best Video + Audio', 'Best Video', 'Best Audio', 'webm', 'mp4', 'mp3', 'm4a'],
         text_color=COLOR.get_colour("Text")
     )
     download_options_menu.set('mp4')
@@ -537,7 +537,7 @@ def _get_download_options(page, repack_option) -> list[
         # Best video/audio doesn't need quality options
         # Hide it when best _ is selected
         match download_option.get():
-            case 'Best Video' | 'Best Audio':
+            case 'Best Video + Audio' | 'Best Video' | 'Best Audio':
                 quality_options_menu.pack_forget()
             case _:
                 repack_option()
